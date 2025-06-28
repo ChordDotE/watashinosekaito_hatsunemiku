@@ -11,7 +11,7 @@ set "RVC_EXECUTE_PATH=%RVC_PATH%\dist\main"
 set "VOICEVOX_EXECUTE_PATH=%VOICEVOX_PATH%\VOICEVOX\vv-engine"
 
 REM バッチファイル起動ディレクトリを基準とした相対パス
-set "MIKU_BASE=%MIKU_PATH%\miku"
+set "MIKU_BASE=%MIKU_PATH%\watashinosekaito_hatsunemiku-main"
 set "MIKU_SRC=%MIKU_BASE%\src"
 
 REM RVC起動
