@@ -1,0 +1,28 @@
+{
+  "api": {
+    "default_provider": "openrouter",
+    "openrouter": {
+      "url": "https://openrouter.ai/api/v1/chat/completions",
+      "api_key": "put your OpenRouter API key",
+      "models": {
+        "conversation": "google/gemini-2.5-flash",
+        "analysis": "openai/o4-mini"
+      }
+    },
+    "gemini": {
+      "api_key": "",
+      "models": {
+        "conversation": "old",
+        "analysis": "old"
+      }
+    }
+  },
+  "audio": {
+    "output_device_backup": "old",
+    "output_device": "old",
+    "webrtc": {
+      "input_device": "old",
+      "input_channels": 2
+    }
+  }
+}

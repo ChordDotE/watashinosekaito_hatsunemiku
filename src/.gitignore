@@ -1,0 +1,10 @@
+# Created by venv; see https://docs.python.org/3/library/venv.html
+api_logs/
+conversations/
+saved_models/
+temp_voice/
+state_logs/
+memory/
+*_pycache__*
+settings.json
+pyvenv.cfg

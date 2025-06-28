@@ -1,0 +1,3 @@
+# setup_interactive.batファイルのみShift_JIS（CP932）として扱う
+setup_interactive.bat text eol=crlf working-tree-encoding=cp932
+system_start_sample.bat text eol=crlf working-tree-encoding=cp932

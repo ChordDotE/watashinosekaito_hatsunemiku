@@ -1,0 +1,1312 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta http-equiv="Content-Language" content="ja">
+    <!-- <title>キャラクターと会話</title> -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --main-color: #39c5bb;
+            --light-color: #e6f8f7;
+            --bg-color: #ffffff;
+        }
+
+        html,
+        body {
+            overflow-x: hidden;
+            width: 100%;
+            position: relative;
+        }
+
+        body {
+            font-family: "Hiragino Kaku Gothic ProN", "メイリオ", sans-serif;
+            margin: 0;
+            padding: 10px;
+            background-color: var(--light-color);
+            min-height: 100vh;
+            box-sizing: border-box;
+            overflow-x: hidden;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        img,
+        video,
+        iframe {
+            max-width: 100%;
+            height: auto;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 0;
+                background-color: var(--bg-color);
+                min-height: 100%;
+            }
+
+            .container {
+                flex-direction: column;
+                height: auto !important;
+                min-height: 100%;
+                width: 100%;
+                max-width: 100%;
+                margin: 0;
+                padding: 0;
+                gap: 0;
+                overflow-x: hidden;
+            }
+
+            .character-section {
+                flex: 0 0 0 !important;
+                padding: 0 !important;
+                margin: 0;
+                box-shadow: none;
+                border-radius: 0;
+                background: none;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                position: relative;
+                /* 位置指定のための基準点 */
+            }
+
+            .response-section {
+                flex: 0 0 30vh;
+                border-radius: 0;
+                box-shadow: none;
+                padding: 0px;
+                background: none;
+                display: flex;
+                flex-direction: column;
+                justify-content: flex-end;
+            }
+
+            .character-image {
+                width: 100%;
+                max-width: 600px;
+                aspect-ratio: 1;
+                object-fit: contain;
+                border-radius: 0;
+                margin: 0 !important;
+            }
+
+            .input-section {
+                margin-top: 10px;
+                flex-wrap: wrap;
+                /* スマホ表示時に折り返し可能に */
+            }
+
+            .attachment-section {
+                margin: 0 !important;
+                padding: 0 !important;
+                gap: 0 !important;
+            }
+
+            textarea {
+                height: 60px;
+                width: 100%;
+                margin: 0;
+                font-size: 16px;
+                border: 1px solid var(--main-color);
+                border-radius: 10px;
+                padding: 8px;
+            }
+
+            button[type="submit"] {
+                width: 100%;
+                padding: 8px;
+                margin: 0;
+                border-radius: 10px;
+                font-size: 14px;
+            }
+
+            .mic-button {
+                display: none !important;
+            }
+
+            /* 添付エリアのスタイル調整 */
+            #attachmentArea {
+                margin-top: 10px;
+            }
+
+            .attachment-item {
+                margin-bottom: 5px;
+            }
+
+            /* モバイル表示時の添付追加ボタンのスタイル */
+            #mobileAddAttachmentButton {
+                position: absolute;
+                left: 10px;
+                bottom: 40px;
+                z-index: 10;
+                transform: none;
+                margin: 0;
+                padding: 6px 12px;
+                font-size: 12px;
+                height: 30px;
+                width: auto;
+                min-width: 80px;
+            }
+
+            /* モバイル表示時に通常の添付追加ボタンを非表示 */
+            .attachment-section #addAttachmentButton.mobile-position {
+                display: none;
+            }
+        }
+
+        .container {
+            display: flex;
+            max-width: 1200px;
+            margin: 0 auto;
+            gap: 0px;
+            height: 100vh;
+            background-color: var(--bg-color);
+        }
+
+        .character-section {
+            flex: 0 0 80vh;
+            padding: 5px;
+            box-shadow: none;
+            border-radius: 0;
+            background: none;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            /* 位置指定のための基準点 */
+            overflow: visible;
+            /* ボタンがはみ出ても表示されるように */
+        }
+
+        .response-section {
+            flex: 1;
+            position: relative;
+            background-color: var(--bg-color);
+            border-radius: 15px;
+            padding: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+        }
+
+        /* 上下2段レイアウト */
+        .attachment-section {
+            width: 100%;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--light-color);
+        }
+
+        .input-section {
+            width: 100%;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .character-image {
+            width: 590px;
+            height: auto;
+            margin: 10px 0 0 0;
+            border-radius: 15px;
+            transition: transform 0.3s ease;
+            object-fit: contain;
+            max-height: calc(100% - 40px);
+        }
+
+        .thinking .character-image {
+            animation: thinking 1s infinite alternate;
+        }
+
+        /* 音声再生中のスタイル - 上下アニメーションを停止 */
+        .speaking .character-image {
+            animation: none;
+        }
+
+        /* 音声再生中は背景に緑色のグラデーションを表示 */
+        .speaking.character-section {
+            position: relative;
+            border-radius: 15px;
+            background: radial-gradient(circle, rgba(57, 197, 187, 0.2) 0%, rgba(57, 197, 187, 0.05) 70%);
+            transition: all 0.3s ease;
+        }
+
+        /* 波紋効果を追加する疑似要素 */
+        .speaking.character-section::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            animation: ripple-waves 3s infinite;
+            z-index: -1;
+        }
+
+        /* 複数の波紋が連続して広がるアニメーション */
+        @keyframes ripple-waves {
+            0% {
+                box-shadow:
+                    0 0 0 0 rgba(57, 197, 187, 0.7),
+                    0 0 0 0 rgba(57, 197, 187, 0.3),
+                    0 0 0 0 rgba(57, 197, 187, 0.1);
+                transform: scale(0.3);
+            }
+
+            20% {
+                box-shadow:
+                    0 0 0 20px rgba(57, 197, 187, 0.5),
+                    0 0 0 40px rgba(57, 197, 187, 0.2),
+                    0 0 0 60px rgba(57, 197, 187, 0);
+                transform: scale(0.5);
+            }
+
+            40% {
+                box-shadow:
+                    0 0 0 40px rgba(57, 197, 187, 0.0),
+                    0 0 0 10px rgba(57, 197, 187, 0.6),
+                    0 0 0 30px rgba(57, 197, 187, 0.3);
+                transform: scale(0.4);
+            }
+
+            60% {
+                box-shadow:
+                    0 0 0 10px rgba(57, 197, 187, 0.0),
+                    0 0 0 30px rgba(57, 197, 187, 0.0),
+                    0 0 0 15px rgba(57, 197, 187, 0.7);
+                transform: scale(0.3);
+            }
+
+            80% {
+                box-shadow:
+                    0 0 0 15px rgba(57, 197, 187, 0.5),
+                    0 0 0 30px rgba(57, 197, 187, 0.3),
+                    0 0 0 45px rgba(57, 197, 187, 0.1);
+                transform: scale(0.4);
+            }
+
+            100% {
+                box-shadow:
+                    0 0 0 30px rgba(57, 197, 187, 0.0),
+                    0 0 0 45px rgba(57, 197, 187, 0.0),
+                    0 0 0 0 rgba(57, 197, 187, 0.7);
+                transform: scale(0.3);
+            }
+        }
+
+        @keyframes thinking {
+            from {
+                transform: translateY(0);
+            }
+
+            to {
+                transform: translateY(-10px);
+            }
+        }
+
+        .latest-response {
+            padding: 20px;
+            background-color: var(--light-color);
+            border-radius: 15px;
+            font-size: 18px;
+            overflow-y: auto;
+            flex-grow: 1;
+            margin-bottom: 20px;
+        }
+
+        /* 未使用のフェードインアニメーション */
+        /* .message {
+            animation: fadeIn 0.3s ease;
+        } */
+
+        textarea {
+            flex: 1;
+            height: 100px;
+            padding: 15px;
+            border: 2px solid var(--main-color);
+            border-radius: 15px;
+            resize: none;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: var(--main-color);
+            box-shadow: 0 0 5px rgba(57, 197, 187, 0.3);
+        }
+
+        button {
+            background-color: var(--main-color);
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 15px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s ease;
+        }
+
+        .mic-button {
+            background-color: var(--main-color);
+            color: white;
+            width: 50px;
+            height: 50px;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.3s ease;
+            padding: 0;
+        }
+
+        .mic-button.recording {
+            background-color: #ff4444;
+            animation: pulse 1.5s infinite;
+        }
+
+        /* 録音ボタンのスタイル */
+        .record-button {
+            background-color: var(--main-color);
+            color: white;
+            width: 50px;
+            height: 50px;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.3s ease;
+            padding: 0;
+        }
+
+        .record-button.recording {
+            background-color: #ff4444;
+            animation: pulse 1.5s infinite;
+        }
+
+
+
+
+        /* 添付エリアのスタイル */
+        #attachmentArea {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            width: 100%;
+        }
+
+        .attachment-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 5px;
+            flex: 1;
+            min-width: 200px;
+        }
+
+        /* ファイル選択のカスタムスタイル */
+        .file-input-container {
+            position: relative;
+            flex: 1;
+            overflow: hidden;
+            border: 1px solid var(--main-color);
+            border-radius: 10px;
+            background-color: white;
+            display: flex;
+            align-items: center;
+        }
+
+        .file-input {
+            position: absolute;
+            left: 0;
+            top: 0;
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+
+        .file-input-label {
+            display: flex;
+            align-items: center;
+            padding: 8px 12px;
+            width: 100%;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            color: #666;
+        }
+
+        .file-input-icon {
+            margin-right: 8px;
+            color: var(--main-color);
+        }
+
+        .file-input-container:hover {
+            border-color: #2db6ac;
+        }
+
+        .file-input-container.has-file .file-input-label {
+            color: #333;
+        }
+
+        /* クリアボタンのスタイル */
+        .clear-button {
+            background-color: #ff6b6b;
+            color: white;
+            width: 40px;
+            height: 40px;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.3s ease;
+            padding: 0;
+            margin-left: 5px;
+        }
+
+        .clear-button:hover {
+            background-color: #ff4444;
+        }
+
+        #addAttachmentButton {
+            padding: 8px 15px;
+            font-size: 14px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.1);
+            }
+
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+
+        button:hover:not(:disabled) {
+            background-color: #2db6ac;
+        }
+
+        /* 未使用のフェードインアニメーション */
+        /* @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        } */
+
+        h1 {
+            color: var(--main-color);
+            text-align: center;
+            margin: 0;
+            font-size: 24px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="character-section">
+            <!-- <h1>キャラクターと会話</h1> -->
+            <img src="/static/using/miku_hatsune.webp.png" alt="キャラクター" class="character-image">
+        </div>
+        <div class="response-section">
+            <!-- <div class="latest-response" id="response">
+                {% if response %}
+                <div class="message assistant">
+                    {{ response }}
+                </div>
+                {% endif %}
+            </div> -->
+            <form id="generateForm" action="/generate" method="post" enctype="multipart/form-data">
+                <!-- 上段：ファイル添付、添付追加、録音、接続開始 -->
+                <div class="attachment-section">
+                    <div id="attachmentArea">
+                        <!-- 添付アイテムはJavaScriptで動的に追加されます -->
+                    </div>
+                    <button type="button" id="addAttachmentButton">
+                        <i class="fas fa-plus"></i> 添付追加
+                    </button>
+                    <!-- <button type="button" class="record-button" id="recordButton">
+                        <i class="fas fa-record-vinyl"></i>
+                    </button> -->
+                </div>
+
+                <!-- 下段：文字の入力欄と応答ボタン -->
+                <div class="input-section">
+                    <textarea name="input_text" id="input_text" required placeholder="話しかけてください"></textarea>
+                    <button type="button" class="mic-button" id="micButton">
+                        <i class="fas fa-microphone"></i>
+                    </button>
+                    <button type="submit" id="submitButton">応答</button>
+                </div>
+            </form>
+            <!-- 非表示の音声要素（WebRTC用とファイル再生用に分離） -->
+            <!-- <audio id="webrtcAudio" autoplay style="display: none;"></audio> -->
+            <audio id="voiceFileAudio" autoplay style="display: none;"></audio>
+        </div>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+    <script>
+        // UUID生成関数
+        function generateUUID() {
+            return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+                var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+                return v.toString(16);
+            });
+        }
+
+        // WebRTC変数
+        /* let pc = null;
+        let audioElement = document.getElementById('webrtcAudio'); */
+
+        // ファイル入力の処理
+        function setupFileInputs() {
+            document.querySelectorAll('.file-input').forEach(input => {
+                // 既存のイベントリスナーを削除
+                input.removeEventListener('change', handleFileInputChange);
+                // 新しいイベントリスナーを追加
+                input.addEventListener('change', handleFileInputChange);
+            });
+
+            document.querySelectorAll('.clear-button').forEach(button => {
+                // 既存のイベントリスナーを削除
+                button.removeEventListener('click', handleClearButtonClick);
+                // 新しいイベントリスナーを追加
+                button.addEventListener('click', handleClearButtonClick);
+            });
+        }
+
+        function handleFileInputChange(e) {
+            const input = e.target;
+            const container = input.closest('.file-input-container');
+            const label = container.querySelector('.file-input-label');
+            const textSpan = label.querySelector('.file-input-text');
+
+            if (input.files.length > 0) {
+                textSpan.textContent = input.files[0].name;
+                container.classList.add('has-file');
+            } else {
+                textSpan.textContent = 'ファイルを選択';
+                container.classList.remove('has-file');
+            }
+        }
+
+        function handleClearButtonClick(e) {
+            const button = e.currentTarget;
+            const attachmentItem = button.closest('.attachment-item');
+            const attachmentArea = document.getElementById('attachmentArea');
+
+            // すべての添付アイテムを削除
+            if (attachmentItem && attachmentArea.contains(attachmentItem)) {
+                attachmentArea.removeChild(attachmentItem);
+            }
+        }
+
+        // 添付ファイルをすべてクリアする関数
+        function clearAllAttachments() {
+            const attachmentArea = document.getElementById('attachmentArea');
+
+            // すべての添付アイテムを削除
+            while (attachmentArea.firstChild) {
+                attachmentArea.removeChild(attachmentArea.firstChild);
+            }
+        }
+
+        // 初期化時にファイル入力の設定
+        setupFileInputs();
+
+        // モバイルデバイスかどうかを判定
+        function isMobileDevice() {
+            return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        }
+
+        // 音声認識の設定
+        const micButton = document.getElementById('micButton');
+        const textarea = document.getElementById('input_text');
+        let recognition = null;
+
+        if ('webkitSpeechRecognition' in window) {
+            recognition = new webkitSpeechRecognition();
+            recognition.continuous = false;
+            recognition.interimResults = false;
+            recognition.lang = 'ja-JP';
+
+            recognition.onstart = function () {
+                micButton.classList.add('recording');
+                textarea.placeholder = '音声を認識中...';
+            };
+
+            recognition.onend = function () {
+                micButton.classList.remove('recording');
+                textarea.placeholder = '話しかけてください';
+            };
+
+            recognition.onresult = function (event) {
+                const result = event.results[0][0].transcript;
+                const currentText = textarea.value;
+
+                // console.log('音声認識結果:', result);
+                // console.log('現在のカーソル位置:', textarea.selectionStart);
+                // console.log('現在のテキスト:', currentText);
+
+                // カーソルが選択されていない、または先頭にある場合は末尾に追加
+                if (textarea.selectionStart === null || textarea.selectionStart === undefined || textarea.selectionStart === 0) {
+                    textarea.value = currentText + result;
+                    // カーソルを文末に移動
+                    textarea.selectionStart = textarea.selectionEnd = textarea.value.length;
+                    // console.log('カーソルを文末に移動:', textarea.selectionStart);
+                } else {
+                    const currentPosition = textarea.selectionStart;
+                    const before = currentText.substring(0, currentPosition);
+                    const after = currentText.substring(currentPosition);
+                    // console.log('分割されたテキスト - 前半:', before);
+                    // console.log('分割されたテキスト - 後半:', after);
+
+                    textarea.value = before + result + after;
+                }
+            };
+
+            recognition.onerror = function (event) {
+                console.error('音声認識エラー:', event.error);
+                micButton.classList.remove('recording');
+                textarea.placeholder = '話しかけてください';
+                if (event.error === 'not-allowed') {
+                    alert('マイクの使用を許可してください');
+                }
+            };
+
+            micButton.addEventListener('click', function () {
+                if (micButton.classList.contains('recording')) {
+                    recognition.stop();
+                } else {
+                    recognition.start();
+                }
+            });
+        } else {
+            micButton.style.display = 'none';
+            console.log('音声認識は利用できません');
+        }
+
+        // 録音機能の実装
+        /* const recordButton = document.getElementById('recordButton');
+        let mediaRecorder = null;
+        let audioChunks = [];
+        let isRecording = false;
+
+        recordButton.addEventListener('click', function () {
+            if (isRecording) {
+                stopRecording();
+            } else {
+                startRecording();
+            }
+        });
+
+        async function startRecording() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                mediaRecorder = new MediaRecorder(stream);
+
+                mediaRecorder.ondataavailable = function (e) {
+                    if (e.data.size > 0) {
+                        audioChunks.push(e.data);
+                    }
+                };
+
+                mediaRecorder.onstop = function () {
+                    const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+                    const audioFile = new File([audioBlob], "recorded_audio.wav", { type: 'audio/wav' });
+
+                    // 録音ファイルをフォームに追加
+                    const dataTransfer = new DataTransfer();
+                    dataTransfer.items.add(audioFile);
+
+                    // 新しいファイル入力欄を作成して追加
+                    const attachmentArea = document.getElementById('attachmentArea');
+                    const newItem = document.createElement('div');
+                    newItem.className = 'attachment-item';
+
+                    // 一意のIDを生成
+                    const fileInputId = 'file-input-' + Date.now();
+
+                    // ファイル入力コンテナを作成
+                    const fileInputContainer = document.createElement('div');
+                    fileInputContainer.className = 'file-input-container has-file';
+
+                    // ファイル入力を作成
+                    const fileInput = document.createElement('input');
+                    fileInput.type = 'file';
+                    fileInput.name = 'file_upload[]';
+                    fileInput.className = 'file-input';
+                    fileInput.id = fileInputId;
+                    fileInput.files = dataTransfer.files;
+
+                    // ラベルを作成
+                    const label = document.createElement('label');
+                    label.htmlFor = fileInputId;
+                    label.className = 'file-input-label';
+
+                    // アイコンを作成
+                    const icon = document.createElement('i');
+                    icon.className = 'fas fa-file-audio file-input-icon';
+
+                    // テキストスパンを作成
+                    const textSpan = document.createElement('span');
+                    textSpan.className = 'file-input-text';
+                    textSpan.textContent = audioFile.name;
+
+                    // ラベルに要素を追加
+                    label.appendChild(icon);
+                    label.appendChild(textSpan);
+
+                    // コンテナに要素を追加
+                    fileInputContainer.appendChild(fileInput);
+                    fileInputContainer.appendChild(label);
+
+                    // クリアボタンを作成
+                    const clearButton = document.createElement('button');
+                    clearButton.type = 'button';
+                    clearButton.className = 'clear-button';
+                    clearButton.setAttribute('data-input-id', fileInputId);
+                    clearButton.innerHTML = '<i class="fas fa-times"></i>';
+
+                    // 要素を追加
+                    newItem.appendChild(fileInputContainer);
+                    newItem.appendChild(clearButton);
+
+                    // 添付エリアに追加
+                    attachmentArea.appendChild(newItem);
+
+                    // イベントリスナーを設定
+                    setupFileInputs();
+
+                    // 録音状態をリセット
+                    audioChunks = [];
+                    isRecording = false;
+                    recordButton.classList.remove('recording');
+
+                    // ストリームのトラックを停止
+                    stream.getTracks().forEach(track => track.stop());
+                };
+
+                mediaRecorder.start();
+                isRecording = true;
+                recordButton.classList.add('recording');
+
+            } catch (error) {
+                console.error('録音エラー:', error);
+                alert('マイクの使用を許可してください');
+            }
+        }
+
+        function stopRecording() {
+            if (mediaRecorder && isRecording) {
+                mediaRecorder.stop();
+            }
+        } */
+
+
+        // 添付アイテムを作成する関数
+        function createAttachmentItem() {
+            const attachmentArea = document.getElementById('attachmentArea');
+            const newItem = document.createElement('div');
+            newItem.className = 'attachment-item';
+
+            // 一意のIDを生成
+            const fileInputId = 'file-input-' + Date.now();
+
+            // ファイル入力コンテナを作成
+            const fileInputContainer = document.createElement('div');
+            fileInputContainer.className = 'file-input-container';
+
+            // ファイル入力を作成
+            const fileInput = document.createElement('input');
+            fileInput.type = 'file';
+            fileInput.name = 'file_upload[]';
+            fileInput.accept = 'image/*,audio/*';
+            fileInput.className = 'file-input';
+            fileInput.id = fileInputId;
+
+            // ラベルを作成
+            const label = document.createElement('label');
+            label.htmlFor = fileInputId;
+            label.className = 'file-input-label';
+
+            // アイコンを作成
+            const icon = document.createElement('i');
+            icon.className = 'fas fa-file file-input-icon';
+
+            // テキストスパンを作成
+            const textSpan = document.createElement('span');
+            textSpan.className = 'file-input-text';
+            textSpan.textContent = 'ファイルを選択';
+
+            // ラベルに要素を追加
+            label.appendChild(icon);
+            label.appendChild(textSpan);
+
+            // コンテナに要素を追加
+            fileInputContainer.appendChild(fileInput);
+            fileInputContainer.appendChild(label);
+
+            // クリアボタンを作成
+            const clearButton = document.createElement('button');
+            clearButton.type = 'button';
+            clearButton.className = 'clear-button';
+            clearButton.setAttribute('data-input-id', fileInputId);
+            clearButton.innerHTML = '<i class="fas fa-times"></i>';
+
+            // 要素を追加
+            newItem.appendChild(fileInputContainer);
+            newItem.appendChild(clearButton);
+
+            // 添付エリアに追加
+            attachmentArea.appendChild(newItem);
+
+            return newItem;
+        }
+
+        // 添付ファイル追加ボタンの実装
+        document.getElementById('addAttachmentButton').addEventListener('click', function () {
+            createAttachmentItem();
+
+            // イベントリスナーを設定
+            setupFileInputs();
+        });
+
+        window.addEventListener('load', async function () {
+            // セッションIDがなければ新しく生成
+            if (!sessionStorage.getItem('clientSessionId')) {
+                sessionStorage.setItem('clientSessionId', generateUUID());
+                console.log('新しいセッションIDを生成しました:', sessionStorage.getItem('clientSessionId'));
+            } else {
+                console.log('既存のセッションIDを使用します:', sessionStorage.getItem('clientSessionId'));
+            }
+
+            const button = document.getElementById('submitButton');
+            const characterSection = document.querySelector('.character-section');
+            const addAttachmentButton = document.getElementById('addAttachmentButton');
+            button.disabled = true;
+            button.textContent = '接続中...';
+
+            // モバイルデバイスの場合、添付追加ボタンをキャラクターセクションに移動
+            if (isMobileDevice()) {
+                // ボタンのクローンを作成
+                const mobileAddButton = addAttachmentButton.cloneNode(true);
+                mobileAddButton.id = 'mobileAddAttachmentButton';
+                mobileAddButton.classList.add('mobile-position');
+
+                // クローンしたボタンにイベントリスナーを追加
+                mobileAddButton.addEventListener('click', function () {
+                    createAttachmentItem();
+                    setupFileInputs();
+                });
+
+                // キャラクターセクションに追加
+                characterSection.appendChild(mobileAddButton);
+
+                // 元のボタンにモバイル用クラスを追加して非表示に
+                addAttachmentButton.classList.add('mobile-position');
+            }
+
+            try {
+                const response = await fetch('/ping', {
+                    method: 'POST'
+                });
+                const data = await response.json();
+                if (!data.success) {
+                    throw new Error(data.error || '接続に失敗しました');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+            } finally {
+                button.disabled = false;
+                button.textContent = '応答';
+            }
+
+            // ページ読み込み時に音声キューを初期化（無応答リマインダー対応）
+            voiceQueue.init();
+            console.log('ページ読み込み完了: 音声キューを初期化しました');
+        });
+
+        document.getElementById('input_text').addEventListener('keydown', function (e) {
+            if (e.ctrlKey && e.key === 'Enter') {
+                e.preventDefault();
+                document.getElementById('submitButton').click();
+            }
+        });
+
+        document.getElementById('generateForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            const button = document.getElementById('submitButton');
+            const characterSection = document.querySelector('.character-section');
+            const userInput = this.input_text.value;
+
+            button.disabled = true;
+            button.textContent = '考え中...';
+            characterSection.classList.add('thinking');
+
+            // 送信前に音声キューを完全にリセットして再初期化
+            voiceQueue.reset();
+            voiceQueue.init();
+            console.log('応答ボタン押下: 音声キューをリセットして再初期化しました');
+
+            const formData = new FormData(this);
+            // セッションIDを追加
+            formData.append('clientSessionId', sessionStorage.getItem('clientSessionId'));
+            this.input_text.value = '';
+
+            // 送信前にファイルをクリア
+            clearAllAttachments();
+
+            fetch('/generate', {
+                method: 'POST',
+                body: formData,
+                // タイムアウトなし
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (!data.success) {
+                        throw new Error(data.error || '応答の生成に失敗しました');
+                    }
+                    console.log('応答生成成功:', data.response);
+
+                    // レスポンスが空白の場合、元の入力テキストを再表示
+                    if (!data.response || data.response.trim() === '') {
+                        this.input_text.value = userInput;
+                        console.log('空のレスポンスのため、元の入力テキストを再表示します:', userInput);
+                    }
+
+                    // 注: 現在はWebSocketで音声ファイル通知を行っているため、以下のコードは使用されていません
+                    // 将来的にAPIレスポンスで音声ファイル名を返す実装に変更された場合のためのバックアップコード
+                    /*
+                    // 音声ファイルがある場合は自動的に再生
+                    if (data.voice_files && data.voice_files.length > 0) {
+                        playVoiceFiles(data.voice_files);
+                    }
+                    */
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('エラーが発生しました');
+                })
+                .finally(() => {
+                    button.disabled = false;
+                    button.textContent = '応答';
+                    characterSection.classList.remove('thinking');
+                });
+        });
+
+        // WebSocket接続の初期化
+        const socket = io();
+
+        // WebSocket接続時にセッションアクティブ化を送信
+        socket.on('connect', () => {
+            console.log('✅ WebSocket接続が確立されました');
+
+            // セッションアクティブ化を送信
+            const sessionId = sessionStorage.getItem('clientSessionId');
+            if (sessionId) {
+                socket.emit('session_activate', { sessionId: sessionId });
+                console.log(`📡 セッションアクティブ化を送信: ${sessionId}`);
+            }
+        });
+
+        // セッションアクティブ化の確認応答
+        socket.on('session_activated', (data) => {
+            console.log(`✅ セッションアクティブ化確認: ${data.sessionId}`);
+        });
+
+        // WebSocketエラーハンドリング
+        socket.on('error', (data) => {
+            console.error('❌ WebSocketエラー:', data.message);
+        });
+
+        // 音声ファイル再生キュー（プリロード機能付き）
+        const voiceQueue = {
+            files: {},           // インデックス -> ファイル名
+            preloadedFiles: {},  // プリロード済みのファイル（Audio要素）
+            nextIndex: 0,        // 次に再生すべきインデックス
+            isPlaying: false,    // 再生中かどうか
+            audioElement: null,  // 再生用の音声要素
+            lastFileReceived: false, // 最後のファイルを受信したかどうか
+
+            // 初期化
+            init: function () {
+                this.audioElement = document.getElementById('voiceFileAudio');
+                this.reset();
+
+                // エラー処理を追加（src属性が空の場合はエラーを無視）
+                this.audioElement.onerror = (e) => {
+                    // src属性が空の場合はエラーを無視
+                    if (!this.audioElement.src || this.audioElement.src === '' || this.audioElement.src === 'about:blank') {
+                        console.log('初期化時の空のsrc属性によるエラーを無視します');
+                        return;
+                    }
+
+                    console.error(`❌ 音声再生エラー: ${e.target.error?.message || '不明なエラー'}`);
+                    // エラー時も次のファイルを再生
+                    this.processQueue();
+                };
+
+                console.log('音声キューを初期化しました');
+            },
+
+            // ファイルを追加してすぐにプリロード開始
+            addFile: function (index, fileName) {
+                this.files[index] = fileName;
+                console.log(`音声ファイルをキューに追加: インデックス${index}, ${fileName}`);
+
+                // すぐにプリロード開始
+                this.preloadFile(index, fileName);
+
+                // 再生中でなければ再生開始
+                if (!this.isPlaying) {
+                    this.processQueue();
+                }
+            },
+
+            // ファイルをプリロード
+            preloadFile: function (index, fileName) {
+                console.log(`🔄 音声ファイルのプリロード開始: ${fileName}`);
+
+                // 新しいAudio要素を作成してプリロード
+                const audio = new Audio();
+
+                // プリロード完了イベント
+                audio.oncanplaythrough = () => {
+                    console.log(`✅ プリロード完了: ${fileName}`);
+                    this.preloadedFiles[index] = audio;
+                };
+
+                // エラー処理
+                audio.onerror = (e) => {
+                    console.error(`❌ プリロードエラー: ${fileName}, ${e.target.error?.message || '不明なエラー'}`);
+                    // エラー時はプリロードされていないものとして処理
+                    delete this.preloadedFiles[index];
+                };
+
+                // プリロード開始
+                audio.src = '/voice_file/' + fileName;
+                audio.load();
+            },
+
+            // キューを処理
+            processQueue: function () {
+                // 次のインデックスのファイルがあれば再生
+                if (this.files[this.nextIndex]) {
+                    this.isPlaying = true;
+                    const fileName = this.files[this.nextIndex];
+                    this.playFile(this.nextIndex, fileName);
+                    delete this.files[this.nextIndex];
+                    this.nextIndex++;
+                } else {
+                    this.isPlaying = false;
+
+                    // 音声再生の無効化をオフにするため、音声リソース解放処理をコメントアウト
+                    /*
+                    // 全ての音声再生が完了し、かつ最後のファイルを受信済みの場合のみ音声リソースを解放
+                    if (Object.keys(this.files).length === 0 && this.lastFileReceived) {
+                        console.log('🔇 全ての音声再生が完了したため、音声リソースを解放します');
+                        if (this.audioElement) {
+                            this.audioElement.pause();
+                            this.audioElement.src = '';
+                            // audioElementはnullにせず、次回の応答時に再利用できるようにする
+                        }
+                        // プリロードされたファイルも解放
+                        this.preloadedFiles = {};
+                        // 最後のファイルフラグをリセット
+                        this.lastFileReceived = false;
+                    }
+                    */
+                }
+            },
+
+            // ファイルを再生（プリロード済みのファイルを使用）
+            playFile: function (index, fileName) {
+                console.log(`▶️ 音声ファイル再生開始: ${fileName}`);
+
+                // 音声要素が無効な場合は再初期化
+                if (!this.audioElement) {
+                    console.log('音声要素が無効なため再初期化します');
+                    this.init();
+                }
+
+                // 音声再生中のクラスを追加
+                const characterSection = document.querySelector('.character-section');
+                characterSection.classList.add('speaking');
+                characterSection.classList.remove('thinking'); // 考え中のアニメーションを停止
+
+                // 再生完了時の処理
+                this.audioElement.onended = () => {
+                    console.log(`⏹️ 音声ファイル再生完了: ${fileName}`);
+
+                    // 次のファイルがなければ、speakingクラスを削除
+                    if (Object.keys(this.files).length === 0) {
+                        characterSection.classList.remove('speaking');
+                    }
+
+                    // プリロード済みのファイルを解放
+                    if (this.preloadedFiles[index]) {
+                        delete this.preloadedFiles[index];
+                    }
+                    // 次のファイルを再生
+                    this.processQueue();
+                };
+
+                // プリロード済みのファイルがあればそれを使用
+                if (this.preloadedFiles[index]) {
+                    console.log(`🔄 プリロード済みのファイルを使用: ${fileName}`);
+                    this.audioElement.src = this.preloadedFiles[index].src;
+                } else {
+                    // プリロードされていない場合は直接再生
+                    console.log(`⚠️ プリロードされていないファイルを直接再生: ${fileName}`);
+                    this.audioElement.src = '/voice_file/' + fileName;
+                }
+
+                // src属性が有効な場合のみ再生を試みる
+                if (this.audioElement.src && this.audioElement.src !== '' && this.audioElement.src !== 'about:blank') {
+                    this.audioElement.play().catch(e => {
+                        console.error(`❌ 音声再生エラー: ${e.message}`);
+                        // エラー時も次のファイルを再生
+                        this.processQueue();
+                    });
+                } else {
+                    console.log('⚠️ 空のsrc属性のため再生をスキップします');
+                    // 次のファイルを再生
+                    this.processQueue();
+                }
+            },
+
+            // キューをリセット（音声要素は常に有効化しておく）
+            reset: function () {
+                this.files = {};
+                this.preloadedFiles = {};
+                this.nextIndex = 0;  // インデックスを0にリセット（重要）
+                this.isPlaying = false;
+                this.lastFileReceived = false;  // 最後のファイルフラグもリセット
+
+                // 音声要素を常に有効化しておくため、停止やsrcクリアは行わない
+                // 現在再生中の音声のみ停止（要素は保持）
+                if (this.audioElement) {
+                    this.audioElement.pause();
+                    // src属性はクリアしない（音声要素を常に有効化）
+                }
+
+                // speakingクラスを削除
+                const characterSection = document.querySelector('.character-section');
+                if (characterSection) {
+                    characterSection.classList.remove('speaking');
+                }
+
+                console.log('音声キューをリセットしました（nextIndex=0, 音声要素は有効化維持）');
+            }
+        };
+
+
+
+        socket.on('disconnect', () => {
+            console.log('⚠️ WebSocket接続が切断されました');
+            // 切断時に自動的に再接続を試みる
+            setTimeout(() => {
+                console.log('WebSocket再接続を試みています...');
+                socket.connect();
+            }, 3000);
+        });
+
+        socket.on('voice_file_ready', (data) => {
+            console.log(`🔊 音声ファイル通知を受信: ${data.file_name} (インデックス: ${data.index})`);
+
+            // 自分のセッションIDと一致する場合のみ処理
+            if (!data.targetSessionId || data.targetSessionId === sessionStorage.getItem('clientSessionId')) {
+                console.log(`🔊 自分宛ての音声ファイル通知を処理: ${data.file_name}`);
+
+                // キューにファイルを追加
+                voiceQueue.addFile(data.index, data.file_name);
+
+                // 最後のファイルの場合
+                if (data.is_last) {
+                    console.log('✅ すべての音声ファイルの生成が完了しました');
+                    // 最後のファイルフラグを設定
+                    voiceQueue.lastFileReceived = true;
+                }
+            } else {
+                console.log(`⏭️ 他のクライアント宛ての音声ファイル通知をスキップ: ${data.file_name} (対象セッション: ${data.targetSessionId})`);
+            }
+        });
+
+        // 無応答リマインダーのWebSocketイベントハンドラー
+        socket.on('inactivity_reminder', (data) => {
+            console.log(`🔔 無応答リマインダーを受信: ${data.response}`);
+
+            // 自分のセッションIDと一致する場合のみ処理
+            if (!data.session_id || data.session_id === sessionStorage.getItem('clientSessionId')) {
+                console.log(`🔔 自分宛ての無応答リマインダーを処理: ${data.response}`);
+
+                // 無応答リマインダーの場合は音声キューを強制的にリセット・初期化
+                console.log('🔔 無応答リマインダー用に音声キューを強制リセット・初期化します');
+                voiceQueue.reset();
+                voiceQueue.init();
+
+                console.log('🔔 無応答リマインダーの音声再生準備完了');
+            } else {
+                console.log(`⏭️ 他のクライアント宛ての無応答リマインダーをスキップ (対象セッション: ${data.session_id})`);
+            }
+        });
+
+        // 音声ファイルを順番に再生する関数（従来の方法、WebSocketを使用しない場合のバックアップ）
+        function playVoiceFiles(files) {
+            // 音声キューをリセット
+            voiceQueue.reset();
+
+            // 音声キューが初期化されていない場合は初期化
+            if (!voiceQueue.audioElement) {
+                voiceQueue.init();
+            }
+
+            // ファイルをキューに追加
+            files.forEach((fileName, index) => {
+                voiceQueue.addFile(index, fileName);
+            });
+        }
+    </script>
+</body>
+
+</html>
