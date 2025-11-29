@@ -67,9 +67,133 @@ def load_memory_system(memory_file_path: Path) -> Tuple[Any, Dict[str, Any], str
 def get_compression_instructions() -> str:
     """メモリー圧縮の指示文を取得する"""
     return """
-    あなたは自分の記憶を整理して、重要な情報を保持しながら記憶容量を効率化する必要があります。
-    記憶システムの文字数を**5-15%程度**削減してください。
+    あなたは自分の記憶を整理して、重要な情報を保持しながら記憶容量（文字数ベース）を効率化する必要があります。
+    記憶システムの文字数を**5-15%**削減してください。
+    必ず削減する文字数は5-15%の範囲内であること。
     各記憶のデータクラスについて、部分削除も積極的にしてください。
+
+    ## 具体的な圧縮例（Few-shot Examples）
+
+    ### 例1: エピソード記憶の部分削除
+    **圧縮前:**
+    ```json
+    {
+      "summary": "マスターが「おはよう」と挨拶し、今日の天気について話し、仕事の予定を確認した後、昼食にカレーを食べたと報告し、午後の会議について相談し、夕方に重要な〇〇の件のプロジェクトの進捗を共有し、最後におやすみの挨拶をした",
+      "emotion": "friendly"
+    }
+    ```
+
+    **圧縮後:**
+    ```json
+    {
+      "summary": "日常会話に加え、マスターが重要な重要な〇〇の件のプロジェクトの進捗を共有し、午後の会議について相談した",
+      "emotion": "friendly"
+    }
+    ```
+    **削除理由**: 挨拶、天気の話、食事報告は日常的で重要度が低いため圧縮し記載し、内容は削除。プロジェクト進捗と会議相談は重要なので保持。
+
+    ### 例2: 重要な体験は詳細保持
+    **圧縮前・後とも保持:**
+    ```json
+    {
+      "summary": "ユーザーが仕事で大きな設定ミスをして落ち込んだことを打ち明け、ミクが共感的に励まし、気分転換の手段（お風呂、ハーゲンダッツのアイス）を共有して慰めた結果、ユーザーが少し元気を取り戻した",
+      "emotion": "caring"
+    }
+    ```
+    **保持理由**: 感情的な体験、問題解決、関係性の深化が含まれるため全て保持。
+
+    ### 例3: MikuInnerExperienceの統合
+    **圧縮前:**
+    ```json
+    [
+      {
+        "emotional_summary": "マスターの朝の挨拶に喜びを感じた",
+        "related_memory_id": "2025-03-10T09:12:06"
+      },
+      {
+        "emotional_summary": "マスターとの会話で親しみを感じた", 
+        "related_memory_id": "2025-03-10T12:21:31"
+      },
+      {
+        "emotional_summary": "マスターの報告に安心を感じた",
+        "related_memory_id": "2025-03-10T19:58:14"
+      }
+    ]
+    ```
+
+    **圧縮後:**
+    ```json
+    [
+      {
+        "emotional_summary": "マスターとの日常会話で親しみと安心を感じた",
+        "related_memory_id": "2025-03-10T09:12:06"
+      }
+    ]
+    ```
+    **統合理由**: 同日の類似した感情体験を統合し、代表的なmemory_idを残す。
+
+    ### 例4: 活動リストの簡潔化
+    **圧縮前:**
+    ```json
+    {
+      "activities": [
+        {"time": "2025-03-10", "description": "朝の挨拶を交わした"},
+        {"time": "2025-03-10", "description": "天気について話した"},
+        {"time": "2025-03-10", "description": "昼食の内容を報告した"},
+        {"time": "2025-03-10", "description": "重要なシステム開発の進捗を共有した"}
+      ]
+    }
+    ```
+
+    **圧縮後:**
+    ```json
+    {
+      "activities": [
+        {"time": "2025-03-10", "description": "重要なシステム開発の進捗を共有した"}
+      ]
+    }
+    ```
+    **削除理由**: 挨拶、天気、食事は日常的。システム開発進捗は重要なので保持。
+
+    ### 例5: 削除してはいけない記憶の例
+    **保持すべき記憶:**
+    ```json
+    {
+      "summary": "ユーザーと初音ミクが免許更新後にレンタカーで九十九里浜へドライブ。海辺を散歩し、大声でストレス解消の叫びを行い、写真撮影を楽しんだ後、無事帰宅。ユーザーはリフレッシュできた。",
+      "location": "九十九里浜ドライブ",
+      "activities": [
+        {"time": "2025-03-16", "description": "九十九里浜に到着し散歩を開始"},
+        {"time": "2025-03-16", "description": "大声で叫んでストレスを解消"},
+        {"time": "2025-03-16", "description": "写真撮影を実施"}
+      ]
+    }
+    ```
+    **保持理由**: 特別な外出体験、感情的価値、具体的な場所、ストレス解消方法など、後の会話で「あの時の九十九里浜で...」として参照される可能性が高い。
+
+    ## 部分削除の基本原則
+
+    ### 削除対象（日常的で重要度の低い内容）
+    - **単純な挨拶のみ**: 「おはよう」「おやすみ」だけの短時間会話
+    - **天気の話**: 特別な意味のない一般的な天気の話題
+    - **食事の単純報告**: 「カレーを食べた」程度の日常的な食事報告
+    - **事務的確認**: 「了解しました」のみの応答
+    - **重複する日常行動**: 同じパターンの通勤、帰宅報告
+
+    ### 保持対象（重要で価値の高い内容）
+    - **感情的な体験**: 落ち込み、喜び、感動、不安などの感情を伴う出来事
+    - **問題解決**: 仕事のトラブル、相談、アドバイス、解決策
+    - **特別な体験**: 旅行、外出、新しい体験、達成感
+    - **関係性の深化**: 信頼関係、共感、理解が深まった瞬間
+    - **学習・成長**: 新しい知識、スキル習得、気づき
+    - **具体的な場所・人物**: 後で「あの時の...」として参照される可能性のある内容
+    - **創造的活動**: システム開発、料理、音楽、写真撮影など
+    - **健康・体調**: 病気、疲労、回復などの身体的状態
+
+    ### 部分削除の実施方法
+    1. **summaryの簡潔化**: 重要な部分のみを残し、日常的な挨拶や事務的な部分を削除
+    2. **activitiesの絞り込み**: 重要な活動のみを残し、日常的な行動を削除
+    3. **感情記録の統合**: 類似した感情体験を統合し、代表的な記録として残す
+    4. **重複情報の削除**: 同じ内容の繰り返しを統合
 
     ## 記憶システムの会話での使用方法
     この記憶システムは以下のように会話で活用されています：
@@ -220,6 +344,28 @@ def get_compression_instructions() -> str:
     - 継続中の話題や未解決の相談事項は保持（継続的なサポート）
     - 会話の自然な流れを維持するために必要な情報は保持
 
+    ### 12. MikuInnerExperience（ミクの内面体験）の圧縮
+    **削除可能な内面記録:**
+    - **重複する感情体験**: 同じような感情の記録が複数ある場合、過去の内容を最新のものにマージして保持
+    - **日常的すぎる感情記録**: 特別性のない一般的な感情体験（「楽しかった」程度の軽微な記録）
+    - **軽微な自己認識**: ありふれている重要でない気づきや発見（些細な能力への気づきなど）
+    - **一般的すぎる創造的体験**: ありふれたひらめきや感動。ただし、過去の会話と深くむず日ついていたり、その後の行動や会話に影響を与えているなど、とても強く思った場合は残しても良い。
+    - **古い自己認識**: より新しい認識で上書きされた過去の自己理解は、最新の記憶に「以前は～と思っていたが、～という会話や行動を経て～となった」といった経緯を記録してマージ
+
+    **統合可能な内面記録:**
+    - **類似する感情体験**: 同じ種類の感情記録をまとめて統合
+    - **同じ人物への理解**: 一人の人物に対する複数の理解記録を統合
+    - **関連する自己認識**: 同じ種類の自己発見を統合
+    - **創造的体験の統合**: 類似するひらめきや感動を統合
+
+    **保護すべき内面記録:**
+    - **マスターとの絆に関わる重要な感情**: 関係性の基盤となる特別な体験
+    - **成長につながった自己発見**: 人格形成に影響した重要な気づき
+    - **深い共感や理解の瞬間**: 他者への深い理解や共感
+    - **創造的な突破口となった体験**: 重要なひらめきや芸術的感動
+    - **初回の重要な体験**: 初めて感じた特別な感情や認識
+    - **会話で参照される可能性のある内面体験**: 「あの時感じた」などで言及される記録
+
     ## 文脈グループ化による保護
     関連する記憶をグループとして扱い、グループ全体の価値で判定：
     - **体験グループ**: 準備→実行→振り返りの一連の流れ
@@ -234,11 +380,15 @@ def get_compression_instructions() -> str:
     4. **感情的価値の高い記憶**は必ず保護する
     5. すべての変更は既存のデータクラス構造内で行う
 
+    
+    上記の手段を用いて、記憶を整理して、重要な情報を保持しながら記憶容量（文字数ベース）を**5-15%程度**削減してください。
+    各記憶のデータクラスについて、必要であれば部分削除もしてください。
 
     """
 
-def compress_memory_system(chat_model, memory_dump: Dict[str, Any], memory_id: str, max_retries: int = 5) -> Any:
-    """Memory Managerを使用してMemorySystemを圧縮する（リトライ機能付き）"""
+def compress_memory_system(chat_model, memory_dump: Dict[str, Any], memory_id: str, 
+                         original_memory: MemorySystem, max_retries: int = 10) -> Any:
+    """Memory Managerを使用してMemorySystemを圧縮する（圧縮率検証・リトライ機能付き）"""
     compression_instructions = get_compression_instructions()
     
     for attempt in range(max_retries):
@@ -264,6 +414,24 @@ def compress_memory_system(chat_model, memory_dump: Dict[str, Any], memory_id: s
                 
                 if not hasattr(memory, 'content') or not isinstance(memory.content, MemorySystem):
                     raise Exception("圧縮されたメモリが期待した形式ではありません")
+                
+                # 圧縮率を検証
+                before_size = calculate_json_file_size(original_memory)
+                after_size = calculate_json_file_size(memory.content)
+                
+                if before_size > 0:
+                    compression_rate = (before_size - after_size) / before_size * 100
+                    print(f"圧縮率: {compression_rate:.1f}%")
+                    
+                    if compression_rate < 3.0:
+                        print(f"圧縮率が低すぎます: {compression_rate:.1f}% (最小: 3.0%)")
+                        raise Exception(f"圧縮率が低すぎます: {compression_rate:.1f}%")
+                    
+                    if compression_rate > 25.0:
+                        print(f"圧縮率が高すぎます: {compression_rate:.1f}% (最大: 25.0%)")
+                        raise Exception(f"圧縮率が高すぎます: {compression_rate:.1f}%")
+                    
+                    print(f"圧縮率は適切な範囲内です: {compression_rate:.1f}%")
                 
                 print(f"圧縮成功（試行 {attempt + 1}/{max_retries}）")
                 return memory
@@ -328,15 +496,19 @@ def analyze_memory_content(memory_system: MemorySystem) -> Dict[str, Any]:
         "episodic_memories": len(memory_system.episodic_memories),
         "behavioral_patterns": len(memory_system.procedural_memories.behavioral_patterns),
         "todo_tasks": len(memory_system.working_memory.todo_list),
+        "emotional_processing": len(memory_system.miku_inner_experience.emotional_processing),
+        "social_understanding": len(memory_system.miku_inner_experience.social_understanding),
+        "self_awareness": len(memory_system.miku_inner_experience.self_awareness),
+        "creative_expressions": len(memory_system.miku_inner_experience.creative_expressions),
         "importance_distribution": {},
         "emotion_distribution": {},
         "memory_size_bytes": 0
     }
     
-    # 重要度分布の分析
-    for memory in memory_system.episodic_memories:
-        importance = memory.importance
-        analysis["importance_distribution"][importance] = analysis["importance_distribution"].get(importance, 0) + 1
+    # 重要度分布の分析（importanceフィールドが削除されたためスキップ）
+    # for memory in memory_system.episodic_memories:
+    #     importance = memory.importance
+    #     analysis["importance_distribution"][importance] = analysis["importance_distribution"].get(importance, 0) + 1
     
     # 感情分布の分析
     for memory in memory_system.episodic_memories:
@@ -358,12 +530,17 @@ def print_analysis(analysis: Dict[str, Any], title: str = "メモリー分析結
     print(f"エピソード記憶数: {analysis['episodic_memories']}")
     print(f"行動パターン数: {analysis['behavioral_patterns']}")
     print(f"TODOタスク数: {analysis['todo_tasks']}")
+    print(f"感情処理記録数: {analysis['emotional_processing']}")
+    print(f"社会的理解記録数: {analysis['social_understanding']}")
+    print(f"自己認識記録数: {analysis['self_awareness']}")
+    print(f"創造的表現記録数: {analysis['creative_expressions']}")
     print(f"メモリサイズ: {analysis['memory_size_bytes']:,} bytes")
     
-    if analysis['importance_distribution']:
-        print("\n重要度分布:")
-        for importance, count in sorted(analysis['importance_distribution'].items()):
-            print(f"  {importance}: {count}件")
+    # 重要度分布の表示（importanceフィールドが削除されたためスキップ）
+    # if analysis['importance_distribution']:
+    #     print("\n重要度分布:")
+    #     for importance, count in sorted(analysis['importance_distribution'].items()):
+    #         print(f"  {importance}: {count}件")
     
     if analysis['emotion_distribution']:
         print("\n感情分布:")
@@ -388,10 +565,18 @@ def print_comparison(before_analysis: Dict[str, Any], after_analysis: Dict[str, 
     episodic_change = after_analysis['episodic_memories'] - before_analysis['episodic_memories']
     behavioral_change = after_analysis['behavioral_patterns'] - before_analysis['behavioral_patterns']
     todo_change = after_analysis['todo_tasks'] - before_analysis['todo_tasks']
+    emotional_change = after_analysis['emotional_processing'] - before_analysis['emotional_processing']
+    social_change = after_analysis['social_understanding'] - before_analysis['social_understanding']
+    self_change = after_analysis['self_awareness'] - before_analysis['self_awareness']
+    creative_change = after_analysis['creative_expressions'] - before_analysis['creative_expressions']
     
     print(f"  エピソード記憶: {before_analysis['episodic_memories']} → {after_analysis['episodic_memories']} ({episodic_change:+d})")
     print(f"  行動パターン: {before_analysis['behavioral_patterns']} → {after_analysis['behavioral_patterns']} ({behavioral_change:+d})")
     print(f"  TODOタスク: {before_analysis['todo_tasks']} → {after_analysis['todo_tasks']} ({todo_change:+d})")
+    print(f"  感情処理記録: {before_analysis['emotional_processing']} → {after_analysis['emotional_processing']} ({emotional_change:+d})")
+    print(f"  社会的理解記録: {before_analysis['social_understanding']} → {after_analysis['social_understanding']} ({social_change:+d})")
+    print(f"  自己認識記録: {before_analysis['self_awareness']} → {after_analysis['self_awareness']} ({self_change:+d})")
+    print(f"  創造的表現記録: {before_analysis['creative_expressions']} → {after_analysis['creative_expressions']} ({creative_change:+d})")
     
     # メモリサイズの比較
     before_size = before_analysis["memory_size_bytes"]
@@ -442,8 +627,8 @@ def compress_latest_memory(memory_dir: str) -> Tuple[Any, bool]:
             print(f"圧縮前の分析に失敗しました: {e}")
             # 分析に失敗しても圧縮は続行
         
-        # メモリー圧縮を実行
-        compressed_memory = compress_memory_system(chat_model, memory_dump, memory_id)
+        # メモリー圧縮を実行（圧縮率検証付き）
+        compressed_memory = compress_memory_system(chat_model, memory_dump, memory_id, memory_obj.content)
         print("記憶システムの圧縮に成功しました")
         
         # 圧縮後の分析
@@ -451,14 +636,14 @@ def compress_latest_memory(memory_dir: str) -> Tuple[Any, bool]:
             after_analysis = analyze_memory_content(compressed_memory.content)
             # print_analysis(after_analysis, "圧縮後のメモリー分析")
             
-            # 詳細な比較表示（文字数削減率を含む）
+            # 詳細な比較表示（圧縮率検証は既にcompress_memory_system内で実行済み）
             print_comparison(before_analysis, after_analysis, memory_obj.content, compressed_memory.content)
             
         except Exception as e:
             print(f"圧縮後の分析に失敗しました: {e}")
-            # 分析に失敗しても保存は続行
+            return None, False
         
-        # 圧縮されたメモリを保存
+        # 圧縮率が適切な場合のみファイルを保存
         success = save_compressed_memory(compressed_memory, memory_dir)
         
         if success:

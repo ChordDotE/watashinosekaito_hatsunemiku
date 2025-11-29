@@ -8,3 +8,4 @@ memory/
 *_pycache__*
 settings.json
 pyvenv.cfg
+/test_*

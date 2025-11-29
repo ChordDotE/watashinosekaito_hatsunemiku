@@ -42,9 +42,9 @@ def analyze_episodic_memories(content):
     elements = {
         'header': 0,  # episodic_memories=[ の部分
         'memory_id': 0,
-        'timestamp_start': 0,
-        'timestamp_end': 0,
-        'duration_minutes': 0,
+        'start_time': 0,  # timestamp_start から start_time に変更
+        'end_time': 0,    # timestamp_end から end_time に変更
+        # 'duration_minutes': 0,  # コメントアウトされたフィールドを削除
         'location': 0,
         'participants': 0,
         'summary': 0,
@@ -52,12 +52,12 @@ def analyze_episodic_memories(content):
         'insights': 0,
         'future_improvements': 0,
         'emotion': 0,
-        'importance': 0,
-        'recall_count': 0,
-        'last_recalled': 0,
-        'retrieval_count': 0,
-        'associated_episodic_ids': 0,
-        'related_memories': 0,
+        # 'importance': 0,  # コメントアウトされたフィールドを削除
+        # 'recall_count': 0,  # コメントアウトされたフィールドを削除
+        # 'last_recalled': 0,  # コメントアウトされたフィールドを削除
+        # 'retrieval_count': 0,  # コメントアウトされたフィールドを削除
+        # 'associated_episodic_ids': 0,  # コメントアウトされたフィールドを削除
+        # 'related_memories': 0,  # コメントアウトされたフィールドを削除
         'extensions': 0,
         'structure': 0,  # 構造要素（括弧、カンマなど）
         'other': 0  # 上記以外の要素
@@ -71,26 +71,26 @@ def analyze_episodic_memories(content):
             char_attribution[i] = 'header'
         elements['header'] = end - start
     
-    # 各要素のパターンを定義
+    # 各要素のパターンを定義（現在のデータクラス構造に合わせて更新）
     patterns = {
         'memory_id': r'memory_id=\'[^\']*\'',
-        'timestamp_start': r'timestamp_start=\'[^\']*\'',
-        'timestamp_end': r'timestamp_end=\'[^\']*\'',
-        'duration_minutes': r'duration_minutes=\d+',
-        'location': r'location=\'[^\']*\'',
-        'participants': r'participants=\[[^\]]*\]',
+        'start_time': r'start_time=\'[^\']*\'',  # timestamp_start から start_time に変更
+        'end_time': r'end_time=\'[^\']*\'',      # timestamp_end から end_time に変更
+        # 'duration_minutes': r'duration_minutes=\d+',  # コメントアウトされたフィールドを削除
+        'location': r'location=\'[^\']*\'|location=None',  # Noneの場合も対応
+        'participants': r'participants=\[[^\]]*\]|participants=None',  # Noneの場合も対応
         'summary': r'summary=\'[^\']*\'',
         'activities': r'activities=\[.*?\]|activities=None',
         'insights': r'insights=\[[^\]]*\]|insights=None',
         'future_improvements': r'future_improvements=\[[^\]]*\]|future_improvements=None',
         'emotion': r'emotion=\'[^\']*\'',
-        'importance': r'importance=\d+\.\d+',
-        'recall_count': r'recall_count=\d+',
-        'last_recalled': r'last_recalled=\'[^\']*\'',
-        'retrieval_count': r'retrieval_count=\d+',
-        'associated_episodic_ids': r'associated_episodic_ids=\[[^\]]*\]',
-        'related_memories': r'related_memories=\[[^\]]*\]',
-        'extensions': r'extensions=\{[^\}]*\}'
+        # 'importance': r'importance=\d+\.\d+',  # コメントアウトされたフィールドを削除
+        # 'recall_count': r'recall_count=\d+',  # コメントアウトされたフィールドを削除
+        # 'last_recalled': r'last_recalled=\'[^\']*\'',  # コメントアウトされたフィールドを削除
+        # 'retrieval_count': r'retrieval_count=\d+',  # コメントアウトされたフィールドを削除
+        # 'associated_episodic_ids': r'associated_episodic_ids=\[[^\]]*\]',  # コメントアウトされたフィールドを削除
+        # 'related_memories': r'related_memories=\[[^\]]*\]',  # コメントアウトされたフィールドを削除
+        'extensions': r'extensions=\[[^\]]*\]'
     }
     
     # Activityクラスのフィールドのパターン
@@ -179,13 +179,13 @@ def analyze_content_sections(file_path):
             
         total_length = len(content)
         
-        # 主要セクションのキーワード
+        # 主要セクションのキーワード（miku_inner_experienceを追加）
         section_keywords = [
-            'participants=',
             'episodic_memories=',
             'semantic_memories=',
             'procedural_memories=',
             'working_memory=',
+            'miku_inner_experience=',
             'associative_memory=',
             'user_experience='
         ]

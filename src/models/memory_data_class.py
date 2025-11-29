@@ -21,6 +21,42 @@ class ParticipantProfile(BaseModel):
     # extended_attributes: Dict[str, object] = Field(default_factory=dict, description="拡張属性情報")
 
 
+# ミクの内面的体験記録システム
+
+class EmotionalProcessing(BaseModel):
+    """感情の処理・理解・表現"""
+    related_memory_id: str = Field(..., description="関連する会話記憶のID")
+    emotional_summary: str = Field(..., description="ミク自身の感情体験の要約（感じた感情→表現→学び）。100文字以内で簡潔に記録。ミクとして特別な感情体験があった場合のみ追加し、日常的な会話や単純な質問応答では記録不要。")
+
+
+class SocialUnderstanding(BaseModel):
+    """マスターや他者への理解・共感"""
+    related_memory_id: str = Field(..., description="関連する会話記憶のID")
+    target_person: str = Field(..., description="理解・共感の対象人物")
+    understanding_gained: str = Field(..., description="会話から、その人物についてミクが得た理解や共感及び、その人物に対してミクが思ったことなど。200文字以内で簡潔に記録。会話の中に新たな共感や理解などがあった場合のみ追加し、日常的な会話や以前と同じような場合は記録不要。")
+
+
+class SelfAwareness(BaseModel):
+    """自己認識・自分への理解"""
+    related_memory_id: str = Field(..., description="関連する会話記憶のID")
+    self_insight_type: str = Field(..., description="自己認識の種類（思い/気持ち/性格/能力/役割/価値観/成長など）")
+    insight_content: str = Field(..., description="ミクの思いや気づき、発見などの内容。200文字以内で記録。新たな発見があった場合のみ追加し、既存の情報や単なる日常的な会話では記録不要。")
+
+
+class CreativeExpression(BaseModel):
+    """創造的表現・想像・夢"""
+    related_memory_id: str = Field(..., description="関連する会話記憶のID")
+    creative_experience_type: str = Field(..., description="創造的体験の種類（新しいアイデア/芸術的感動/具体的な夢/やりたいこと発見など）")
+    experience_content: str = Field(..., description="具体的な創造的体験や発見の内容。150文字以内で記録。新たな創造的ひらめきや具体的な夢などが生まれた場合のみ追加し、既存の興味や一般的な話題では記録不要。")
+
+class MikuInnerExperience(BaseModel):
+    """ミクの内面的体験の統合記録"""
+    
+    emotional_processing: List[EmotionalProcessing] = Field(default_factory=list, description="感情体験の統合記録（感じた感情→表現→学び）。特別な感情体験があった場合のみ記録し、日常的な挨拶や単純な質問応答では記録不要。もし以前と似たような内容であればマージすることで文字数を削減する。")
+    social_understanding: List[SocialUnderstanding] = Field(default_factory=list, description="人物中心の社会的理解記録（対象人物とその人物への理解・共感・思い）。新たな共感や理解があった場合のみ記録し、日常的な会話や以前と同様の場合は記録不要。")
+    self_awareness: List[SelfAwareness] = Field(default_factory=list, description="種類別自己認識記録（思い・気持ち・性格・能力・役割・価値観・成長など）。新たな自己発見があった場合のみ記録し、既存情報や日常的な会話では記録不要。")
+    creative_expressions: List[CreativeExpression] = Field(default_factory=list, description="体験特化型創造的記録（新しいアイデア・芸術的感動・具体的な夢・やりたいこと発見など）。新たな創造的ひらめきや具体的な夢が生まれた場合のみ記録し、既存の興味や一般的な話題では記録不要。もし以前と似たような内容であればマージすることで文字数を削減する。")
+
 # class EmotionalContext(BaseModel):
 #     """感情コンテキスト情報"""
 #     emotion: str = Field(..., description="感情の種類")
@@ -53,7 +89,7 @@ class Activity(BaseModel):
 class EpisodicMemory(BaseModel):
     """エピソード記憶（特定の出来事や体験の記憶）"""
     # 基本識別情報
-    # memory_id: str = Field(..., description="記憶の一意識別子")
+    memory_id: str = Field(..., description="記憶の一意識別子（（現在時刻ではなく）会話文のタイムスタンプから読み取れる活動の日付のYYYY-MM-DD形式。重複時は「YYYY-MM-DD_2」「YYYY-MM-DD_3」のように保存）")
     
     # 時間情報
     start_time: str = Field(..., description="（現在時刻ではなく）会話文のタイムスタンプから読み取れる記憶の開始時間（YYYY-MM-DDThh:mm形式）")
@@ -61,14 +97,14 @@ class EpisodicMemory(BaseModel):
     # duration_minutes: int = Field(..., ge=0, description="記憶の継続時間（分）")
     
     # 場所と活動
-    location: Optional[str] = Field(..., description="会話した場所が家以外の場合のみ、会話場所を記録する。特に言及がなければ家で会話したものとして扱う。")
-    participants: Optional[List[str]]= Field(..., description="master,Miku以外の参加者がいた場合に参加者IDのリストを記載")
+    location: Optional[str] = Field(default=None, description="会話した場所が自宅以外の場合のみ、会話場所を記録する。特に言及がなければ家で会話したものとして扱う。")
+    participants: Optional[List[str]] = Field(default_factory=list, description="master,Miku以外の参加者がいた場合に参加者IDのリストを記載")
     
     # 内容情報
     summary: str = Field(..., description="記憶・会話の説明。会話や行動などの内容がすべてわかるよう、詳細に記録すること")
-    activities: Optional[List[Activity]] = Field(None, description="活動データリスト。日常の会話・行動では最大2個、外出・旅行等では最大5個に制限すること。会話のみの事項は記載せず、行動のみを記載する")
-    insights: Optional[List[str]] = Field(None, description="洞察リスト")
-    future_improvements: Optional[List[str]] = Field(None, description="将来の改善点リスト")
+    activities: Optional[List[Activity]] = Field(default_factory=list, description="活動データリスト。日常の会話・行動では最大2個、外出・旅行等では最大5個に制限すること。会話のみの事項は記載せず、行動のみを記載する")
+    insights: Optional[List[str]] = Field(default_factory=list, description="洞察リスト")
+    future_improvements: Optional[List[str]] = Field(default_factory=list, description="将来の改善点リスト")
     
     # 感情情報
     emotion: str = Field(..., description="各人が感じていた感情")
@@ -77,7 +113,7 @@ class EpisodicMemory(BaseModel):
     # media: List[MediaItem] = Field(default_factory=list, description="関連メディアリスト")
     
     # 重要度と信頼性
-    importance: float = Field(..., ge=0.0, le=1.0, description="重要度（0.0～1.0）。会話の内容や、あとから振り返られた回数に応じて決まる。")
+    # importance: float = Field(..., ge=0.0, le=1.0, description="重要度（0.0～1.0）。会話の内容や、あとから振り返られた回数に応じて決まる。")
     
     # 検索・想起関連
     # recall_count: int = Field(0, ge=0, description="想起回数")
@@ -89,7 +125,7 @@ class EpisodicMemory(BaseModel):
     # related_memories: List[str] = Field(default_factory=list, description="関連する記憶IDリスト")
     
     # 拡張情報
-    extensions: Dict[str, str] = Field(default_factory=dict, description="拡張フィールド（最大3項目に絞って記録。天気、交通手段、作曲詳細など）")
+    extensions: List[str] = Field(default_factory=list, description="拡張フィールド（最大3項目に絞って記録。天気、交通手段、作曲詳細など）")
 
 
 # 意味記憶関連クラス
@@ -126,7 +162,7 @@ class VisitedPlace(BaseModel):
     name: str = Field(..., description="場所の名前（自宅は記録せず、それ以外の場所を訪れた際のみ記録する）")
     # coordinates: Dict[str, float] = Field(..., description="座標情報（緯度・経度）")
     visit_date: str = Field(..., description="訪問日")
-    activities: Optional[List[str]] = Field(..., description="活動リスト")
+    activities: Optional[List[str]] = Field(default_factory=list, description="活動リスト")
     user_impression: str = Field(..., description="ユーザーの印象")
     # confidence: float = Field(..., ge=0.0, le=1.0, description="信頼度（0.0～1.0）")
 
@@ -142,28 +178,25 @@ class UserProfile(BaseModel):
     """ユーザープロファイル"""
     basic_info: List[str] = Field(..., description="基本情報")
     preferences: Dict[str, List[str]] = Field(default_factory=dict, description="好みの情報（カテゴリ名: アイテムリスト）")
-    relationships: Optional[List[Relationship]] = Field(..., description="人間関係リスト")
+    relationships: Optional[List[Relationship]] = Field(default_factory=list, description="人間関係リスト")
     important_dates: List[ImportantDate] = Field(..., description="重要な日付リスト")
-    visited_places: Optional[List[VisitedPlace]] = Field(..., description="訪問した場所リスト")
-    extensions: List[str] = Field(default_factory=dict, description="追加情報")
+    visited_places: Optional[List[VisitedPlace]] = Field(default_factory=list, description="訪問した場所リスト")
+    extensions: List[str] = Field(default_factory=list, description="追加情報")
 
-    recent_activity: Optional[str] = Field(..., description="最近の活動")
-    goals_or_challenges: Optional[str] = Field(..., description="目標または課題")
-    health_status: Optional[List[str]] = Field(..., description="健康状態")
+    recent_activity: Optional[str] = Field(default=None, description="最近の活動")
+    goals_or_challenges: Optional[str] = Field(default=None, description="目標または課題")
+    health_status: Optional[List[str]] = Field(default_factory=list, description="健康状態")
 
 
-class AgentProfile(BaseModel):
+class MikuProfile(BaseModel):
     """エージェントプロファイル"""
-    name: str = Field(..., description="名前")
-    created_on: str = Field(..., description="作成日（YYYY-MM-DDThh:mm形式）")
-    version: str = Field(..., description="バージョン")
-    developer: str = Field(..., description="開発者")
+    name: str = Field(..., description="名前（初音ミク）")
     personality_traits: List[str] = Field(..., description="性格特性リスト")
     interests: List[str] = Field(..., description="興味リスト")
     skills: Optional[List[str]] = Field(..., description="スキルリスト")
     beliefs: Dict[str, str] = Field(..., description="信念")
     # extended_attributes: Dict[str, str] = Field(..., description="拡張属性")
-    extensions: Dict[str, object] = Field(..., description="拡張フィールド")
+    extensions: List[str] = Field(default_factory=list, description="その他のこと（拡張フィールド）")
 
 
 # class WorldKnowledge(BaseModel):
@@ -177,14 +210,14 @@ class Agreement(BaseModel):
     agreement_id: str = Field(..., description="合意の一意識別子")
     title: str = Field(..., description="タイトル")
     participants: List[str] = Field(..., description="参加者IDリスト")
-    currentStatus: str = Field(..., description="現在の状態")
+    current_status: str = Field(..., description="現在の状態")
     # changeLog: List[ChangeLog] = Field(..., description="変更ログリスト")
 
 
 class SemanticMemories(BaseModel):
     """意味記憶（概念や事実の記憶）"""
     user_profiles: Dict[str, UserProfile] = Field(..., description="ユーザープロファイル")
-    agent_profiles: Dict[str, AgentProfile] = Field(..., description="エージェントプロファイル")
+    agent_profiles: Dict[str, MikuProfile] = Field(..., description="初音ミクのプロファイル")
     agreements: List[Agreement] = Field(default_factory=list, description="合意事項リスト")
     # world_knowledge: WorldKnowledge = Field(..., description="世界知識")
 
@@ -231,8 +264,8 @@ class Skill(BaseModel):
     name: str = Field(..., description="スキル名")
     process: List[str] = Field(..., description="プロセスリスト")
     # templates: Dict[str, object] = Field(..., description="テンプレート")
-    extensions: Dict[str, str] = Field(default_factory=dict, description="拡張フィールド")
-    mastery_level: float = Field(..., ge=0.0, le=1.0, description="習熟度（0.0～1.0）")
+    extensions: List[str] = Field(default_factory=list, description="拡張フィールド")
+    mastery_level: str = Field(...,  description="どれくらいうまくできるのか（習熟度）")
     last_used: str = Field(..., description="最終使用時間（YYYY-MM-DDThh:mm形式）")
     # voice_banks: Optional[List[str]] = Field(None, description="ボイスバンクリスト")
 
@@ -251,11 +284,11 @@ class Task(BaseModel):
     # taskId: str = Field(..., description="タスクの一意識別子")
     title: str = Field(..., description="タイトル")
     description: str = Field(..., description="説明")
-    dueDate: Optional[str] = Field(..., description="期限（YYYY-MM-DDThh:mm形式）")
+    due_date: Optional[str] = Field(..., description="期限（YYYY-MM-DDThh:mm形式）")
     status: str = Field(..., description="状態")
     priority: str = Field(..., description="優先度")
     # createdAt: datetime.datetime = Field(..., description="作成時間")
-    completedDte: Optional[str] = Field(None, description="完了時間（YYYY-MM-DDThh:mm形式）")
+    completed_date: Optional[str] = Field(None, description="完了時間（YYYY-MM-DDThh:mm形式）")
 
 
 class WorkingMemory(BaseModel):
@@ -397,6 +430,7 @@ class MemorySystem(BaseModel):
     semantic_memories: SemanticMemories = Field(..., description="意味記憶")
     procedural_memories: ProceduralMemories = Field(..., description="手続き記憶")
     working_memory: WorkingMemory = Field(..., description="ワーキングメモリ")
+    miku_inner_experience: MikuInnerExperience = Field(..., description="ミク自身の思いや気持ち、自我、内面的体験の記録")
     # associative_memory: AssociativeMemory = Field(..., description="連想記憶")
     # memory_metadata: MemoryMetadata = Field(..., description="記憶メタデータ")
     
@@ -422,11 +456,16 @@ class MemorySystem(BaseModel):
             procedural_memories=ProceduralMemories(
                 behavioral_patterns=[],
                 routines=[],
-                skills={},
-                todo_list=[]
+                skills={}
             ),
             working_memory=WorkingMemory(
                 todo_list=[]
+            ),
+            miku_inner_experience=MikuInnerExperience(
+                emotional_processing=[],
+                social_understanding=[],
+                self_awareness=[],
+                creative_expressions=[]
             )
             # associative_memory=AssociativeMemory(
             #     concept_networks=[],
@@ -498,7 +537,7 @@ class MemorySystem(BaseModel):
 class Message(BaseModel):
     """会話メッセージ"""
     timestamp: str = Field(..., description="会話文のタイムスタンプから読み取れる、メッセージのタイムスタンプ（ISO 8601形式）")
-    role: str = Field(..., description="メッセージの発話者（user/assitant）")
+    role: str = Field(..., description="メッセージの発話者（user/Miku）")
     content: str = Field(..., description="メッセージの本文")
     speaker_name: str = Field(..., description="発言者の名前（会話や文脈から特に指示がない場合は、人間のユーザーは全て「マスター」の発言であるものとする。）")
 
