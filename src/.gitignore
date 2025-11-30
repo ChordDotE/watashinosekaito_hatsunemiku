@@ -9,3 +9,4 @@ memory/
 settings.json
 pyvenv.cfg
 /test_*
+KV/
