@@ -1,0 +1,990 @@
+<!--
+  Watashinosekaito Hatsune Miku
+  Copyright (c) 2025-2026 ChordDotE. All rights reserved.
+  SPDX-License-Identifier: LicenseRef-ChordDotE-NonCommercial-2.0
+
+  NON-COMMERCIAL USE ONLY. NO BUSINESS USE. NO ADAPTATION.
+
+  Business use (any use by or for a company, organization, or sole
+  proprietor, WHETHER OR NOT ANY PAYMENT IS INVOLVED) and publishing or
+  distributing modified versions are PROHIBITED IN ALL CASES; no permission
+  is granted for them. Forks may be used only to propose improvements to the
+  Author (e.g. pull requests). Commercial use, redistribution, and Adaptation
+  are PROHIBITED without prior written permission. "Adaptation" includes
+  manual reimplementation, automated translation, and generation using large
+  language models or other machine learning, of software having equivalent or
+  similar functionality. Permission is granted individually, in recorded form.
+  Contact: https://x.com/ChordDotE
+
+  業務利用（対価の有無を問わず、法人・団体・個人事業主による利用と事業のための利用）と、
+  改変版の公開・配布は、許可の余地なく禁止します。フォークは作者への改善の提案
+  （プルリクエスト等）のためだけに使えます。商用利用・再配布・翻案は、作者の許可が
+  ない限り禁止します。翻案には、再実装・自動変換・大規模言語モデル等を用いた生成に
+  よる、同等または類似の機能を持つソフトウェアの作成を含みます。
+  許可が必要な場合は、記録の残る形でご連絡ください。
+
+  See LICENSE for full terms. 詳細は LICENSE を参照してください。
+-->
+
+<template>
+    <style>
+        /* -------------------------------------------
+           CSS変数（テーマカラー）
+           ------------------------------------------- */
+        :host {
+            --main-color: #39c5bb;
+            --light-color: #e6f8f7;
+            --bg-color: #ffffff;
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            height: 100%;
+            max-height: 100%;
+            overflow: hidden;
+        }
+
+        /* -------------------------------------------
+           チャット入力エリア
+           ------------------------------------------- */
+        .response-section {
+            flex: 1;
+            position: relative;
+            background-color: var(--bg-color);
+            border-radius: 15px;
+            padding: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            max-height: 100%;
+            overflow: hidden;
+        }
+
+        /* 添付セクション（上段） */
+        .attachment-section {
+            width: 100%;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--light-color);
+        }
+
+        /* 操作ボタン群を1列（折り返さない）で並べる。添付ファイル領域(#attachmentArea)は
+           width:100% で上段に出るので、ボタンだけをこの行にまとめる */
+        .button-row {
+            display: flex;
+            flex-wrap: nowrap;
+            gap: 10px;
+            align-items: center;
+        }
+
+        /* 入力セクション（下段） */
+        .input-section {
+            width: 100%;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        /* -------------------------------------------
+           フォーム要素
+           ------------------------------------------- */
+        textarea {
+            flex: 1;
+            height: 100px;
+            padding: 15px;
+            border: 2px solid var(--main-color);
+            border-radius: 15px;
+            resize: none;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+            font-family: inherit;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: var(--main-color);
+            box-shadow: 0 0 5px rgba(57, 197, 187, 0.3);
+        }
+
+        button {
+            background-color: var(--main-color);
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 15px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s ease;
+        }
+
+        button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+
+        button:hover:not(:disabled) {
+            background-color: #2db6ac;
+        }
+
+        /* 考え中（追加OK）: 押せるが通常の「話す」とは区別する半透明メインカラー。
+           押すと考え中のターンへ追加発話を畳み込み送信する（P2・2026-08-01） */
+        button[type="submit"].fold-ready {
+            background-color: rgba(57, 197, 187, 0.45);
+        }
+        button[type="submit"].fold-ready:hover:not(:disabled) {
+            background-color: rgba(57, 197, 187, 0.65);
+        }
+
+        /* -------------------------------------------
+           ファイル添付エリア
+           ------------------------------------------- */
+        #attachmentArea {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            width: 100%;
+        }
+
+        .attachment-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 5px;
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .file-input-container {
+            position: relative;
+            flex: 1;
+            overflow: hidden;
+            border: 1px solid var(--main-color);
+            border-radius: 10px;
+            background-color: white;
+            display: flex;
+            align-items: center;
+        }
+
+        .file-input {
+            position: absolute;
+            left: 0;
+            top: 0;
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+
+        .file-input-label {
+            display: flex;
+            align-items: center;
+            padding: 8px 12px;
+            width: 100%;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            color: #666;
+        }
+
+        .file-input-icon {
+            margin-right: 8px;
+            color: var(--main-color);
+        }
+
+        .file-input-container:hover {
+            border-color: #2db6ac;
+        }
+
+        .file-input-container.has-file .file-input-label {
+            color: #333;
+        }
+
+        .clear-button {
+            background-color: #ff6b6b;
+            color: white;
+            width: 40px;
+            height: 40px;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.3s ease;
+            padding: 0;
+            margin-left: 5px;
+        }
+
+        .clear-button:hover {
+            background-color: #ff4444;
+        }
+
+        #addAttachmentButton {
+            padding: 8px 15px;
+            font-size: 14px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        /* -------------------------------------------
+           マイクボタン
+           ------------------------------------------- */
+
+        /* マイクボタン: 丸型、送信ボタンの横に配置 */
+        #micButton {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            padding: 0;
+            display: none;
+            /* デフォルト非表示。STT有効時にJSで display:flex にする */
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            flex-shrink: 0;
+            transition: background-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        /* OFF状態: グレー */
+        #micButton[data-mic-state="OFF"] {
+            background-color: #999;
+        }
+
+        /* MUTED状態: グレー（ミク音声の再生中の一時ミュート。再生終了で自動復帰） */
+        #micButton[data-mic-state="MUTED"] {
+            background-color: #999;
+        }
+
+        /* LISTENING状態: メインカラー + パルスアニメーション */
+        #micButton[data-mic-state="LISTENING"] {
+            background-color: var(--main-color);
+            animation: mic-pulse 2s ease-in-out infinite;
+        }
+
+        /* RECORDING状態: 赤（録音中を視覚的に強調） */
+        #micButton[data-mic-state="RECORDING"] {
+            background-color: #e74c3c;
+            box-shadow: 0 0 12px rgba(231, 76, 60, 0.6);
+        }
+
+        /* PROCESSING状態: 黄色（STT処理待ち） */
+        #micButton[data-mic-state="PROCESSING"] {
+            background-color: #f39c12;
+            cursor: wait;
+        }
+
+        /* LISTENING時のパルスアニメーション */
+        @keyframes mic-pulse {
+
+            0%,
+            100% {
+                box-shadow: 0 0 0 0 rgba(57, 197, 187, 0.4);
+            }
+
+            50% {
+                box-shadow: 0 0 0 8px rgba(57, 197, 187, 0);
+            }
+        }
+
+        /* AUTO送信モード LISTENING: 濃い緑 + パルス */
+        #micButton[data-mic-mode="AUTO"][data-mic-state="LISTENING"] {
+            background-color: #1a9990;
+            animation: mic-pulse-auto 2s ease-in-out infinite;
+        }
+
+        @keyframes mic-pulse-auto {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(26, 153, 144, 0.4); }
+            50%       { box-shadow: 0 0 0 8px rgba(26, 153, 144, 0); }
+        }
+
+        /* AUTO送信モード RECORDING: 通常と同じ赤 + グロー */
+        #micButton[data-mic-mode="AUTO"][data-mic-state="RECORDING"] {
+            background-color: #e74c3c;
+            box-shadow: 0 0 12px rgba(231, 76, 60, 0.6);
+            animation: none;
+        }
+
+        /* 考え中（追加受付中）の聞き取り: 薄い緑。「今話すと畳み込みになる」ことを示す。
+           手動/AUTO のどちらの LISTENING よりも薄い色（MUTED グレー・RECORDING 赤はそのまま優先）。
+           data-turn-open は turnState（turnBelief=OPEN）から導出される（miku-chat.js） */
+        #micButton[data-turn-open="true"][data-mic-state="LISTENING"] {
+            background-color: #7ecfca;
+            animation: mic-pulse 2s ease-in-out infinite;
+        }
+
+        /* LOADING状態: グレー地に薄緑でふわふわ点滅（STTモデルロード中） */
+        #micButton[data-mic-state="LOADING"] {
+            background-color: #999;
+            animation: mic-loading-pulse 1.4s ease-in-out infinite;
+            cursor: wait;
+        }
+
+        @keyframes mic-loading-pulse {
+            0%, 100% {
+                background-color: #999;
+                box-shadow: 0 0 0 0 rgba(57, 197, 187, 0);
+            }
+            50% {
+                background-color: #7ecfca;
+                box-shadow: 0 0 10px 4px rgba(57, 197, 187, 0.45);
+            }
+        }
+
+        /* -------------------------------------------
+           自動送信カウントダウンバー
+           話すボタンの背景が左→右に濃い色で埋まっていく
+           ------------------------------------------- */
+        @keyframes countdown-fill {
+            from { background-position: 100% 0; }
+            to   { background-position: 0% 0; }
+        }
+
+        button[type="submit"].counting-down {
+            background: linear-gradient(to right, #1a9990 50%, var(--main-color) 50%);
+            background-size: 200% 100%;
+            background-position: 100% 0;
+            animation: countdown-fill var(--countdown-duration, 5s) linear forwards;
+        }
+
+        /* -------------------------------------------
+           マイクパネル（マイクボタン長押しで開く・再タップで閉じる）
+           直近の会話履歴 + 音声レベルメーターを1枚に統合（2026-08-01）。
+           カメラプレビュー（#cameraPreview）と同じ「長押しで開く」操作系。
+           ------------------------------------------- */
+        #micPanel {
+            display: none;
+            position: absolute;
+            bottom: calc(100% + 12px);
+            left: 0;
+            right: 0;
+            background: rgba(20, 34, 33, 0.9);
+            color: #fff;
+            border-radius: 14px;
+            padding: 12px 14px;
+            font-size: 12.5px;
+            line-height: 1.5;
+            box-shadow: 0 6px 24px rgba(0, 0, 0, 0.35);
+            z-index: 100;
+        }
+
+        #micPanel.open {
+            display: block;
+        }
+
+        .mic-panel-title {
+            font-size: 11px;
+            color: #9fd8d4;
+            margin-bottom: 7px;
+        }
+
+        /* 履歴が長いとパネルが画面の上へはみ出してさかのぼれなかった（2026-10-09）。
+           高さに上限を付けて中でスクロールさせる（描画のたびに最新＝末尾へ寄せる・microphoneUI.js） */
+        #micPanelHistory {
+            max-height: 45vh;
+            max-height: 45dvh;
+            overflow-y: auto;
+            overscroll-behavior: contain;
+        }
+
+        .mic-panel-utt {
+            display: flex;
+            gap: 7px;
+            margin: 6px 0;
+        }
+
+        .mic-panel-utt .utt-time {
+            color: #88a5a2;
+            font-size: 10px;
+            padding-top: 2px;
+            flex-shrink: 0;
+        }
+
+        .mic-panel-utt .utt-who {
+            font-weight: 700;
+            flex-shrink: 0;
+            color: #7fe3db;
+        }
+
+        .mic-panel-utt .utt-who.user {
+            color: #ffd97f;
+        }
+
+        .mic-panel-empty {
+            color: #9ab5b2;
+            font-size: 11px;
+            padding: 4px 0;
+        }
+
+        /* -------------------------------------------
+           音声レベルメーター（OBS風）
+           マイクパネル内の下段。マイクON中のみ表示（OFF時は履歴のみのパネルになる）。
+           ------------------------------------------- */
+
+        /* レベルメーター全体のコンテナ */
+        .mic-level-section {
+            display: none;
+            /* デフォルト非表示。パネル表示中かつマイクONのときJSが表示する */
+            width: 100%;
+            margin-top: 10px;
+            padding: 9px 0 0 0;
+            border-top: 1px solid rgba(255, 255, 255, 0.18);
+            gap: 6px;
+            flex-direction: column;
+        }
+
+        /* レベルバーの行（バー + dB表示） */
+        .mic-level-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* レベルバーの外枠 */
+        .mic-level-track {
+            flex: 1;
+            height: 8px;
+            background: #2a2a2a;
+            border-radius: 4px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* レベルバーの塗り（現在の音声レベル） */
+        .mic-level-fill {
+            height: 100%;
+            width: 0%;
+            border-radius: 4px;
+            transition: width 0.05s linear;
+            /* OBS風のグラデーション: 緑 → 黄 → 赤 */
+            background: linear-gradient(to right,
+                    #2ecc71 0%,
+                    #2ecc71 60%,
+                    #f1c40f 75%,
+                    #e74c3c 90%,
+                    #c0392b 100%);
+        }
+
+        /* 閾値スライダーの行 */
+        .mic-threshold-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* 閾値ラベル（ダークパネル内なので明色） */
+        .mic-threshold-label {
+            font-size: 11px;
+            color: #9ab5b2;
+            white-space: nowrap;
+        }
+
+        /* 音声のみモード（AUTO）: 入力欄・話すボタンを隠してアバター表示を広げる */
+        .input-section.voice-only {
+            display: none;
+        }
+
+        /* 閾値スライダー */
+        .mic-threshold-slider {
+            flex: 1;
+            height: 4px;
+            -webkit-appearance: none;
+            appearance: none;
+            background: #ddd;
+            border-radius: 2px;
+            outline: none;
+            cursor: pointer;
+        }
+
+        .mic-threshold-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: var(--main-color);
+            cursor: pointer;
+            border: 2px solid white;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+        }
+
+        .mic-threshold-slider::-moz-range-thumb {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: var(--main-color);
+            cursor: pointer;
+            border: 2px solid white;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+        }
+
+        /* -------------------------------------------
+           カメラボタン
+           ------------------------------------------- */
+        #cameraButton {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            padding: 0;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            flex-shrink: 0;
+            transition: background-color 0.3s ease, box-shadow 0.3s ease;
+            position: relative;
+        }
+
+        #cameraButton[data-camera-state="OFF"] {
+            background-color: #999;
+        }
+
+        #cameraButton[data-camera-state="ON"] {
+            background-color: var(--main-color);
+        }
+
+        #cameraButton[data-camera-state="ON"]:hover {
+            background-color: #2db6ac;
+        }
+
+        /* -------------------------------------------
+           字幕ボタン（返答テキスト表示のON/OFF）
+           ※形状（寸法・角丸・フォント）は .icon-menu button に一本化。ここには色だけ書く。
+             ID セレクタで形状を再指定すると、@media 内のクラス指定（詳細度が低い）に
+             勝ってしまい、スマホでメニュー内だけ 50px のまま残る（2026-08-06 実測で判明）
+           ------------------------------------------- */
+        #captionButton[data-caption-state="OFF"] {
+            background-color: #999;
+        }
+
+        #captionButton[data-caption-state="ON"] {
+            background-color: var(--main-color);
+        }
+
+        #captionButton[data-caption-state="ON"]:hover {
+            background-color: #2db6ac;
+        }
+
+        /* -------------------------------------------
+           無応答リマインダーボタン（ON/OFFトグル。既定ON・永続化なし）
+           ※形状は .icon-menu button に一本化（上記 #captionButton のコメント参照）
+           ------------------------------------------- */
+        #reminderButton[data-reminder-state="OFF"] {
+            background-color: #999;
+        }
+
+        #reminderButton[data-reminder-state="ON"] {
+            background-color: var(--main-color);
+        }
+
+        #reminderButton[data-reminder-state="ON"]:hover {
+            background-color: #2db6ac;
+        }
+
+        /* -------------------------------------------
+           アイコンメニュー（会話設定／表示。タップで上にサブボタンを展開）
+           ------------------------------------------- */
+        /* 親ボタンとサブメニューを重ねるためのアンカー（各ボタン中央上にメニューを出す） */
+        .menu-anchor {
+            position: relative;
+            display: flex;
+            flex-shrink: 0;
+        }
+
+        #conversationButton,
+        #displayButton {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            flex-shrink: 0;
+            transition: background-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        #conversationButton[data-conversation-state="OFF"],
+        #displayButton[data-display-state="OFF"] {
+            background-color: #999;
+        }
+
+        #conversationButton[data-conversation-state="ON"],
+        #conversationButton[data-conversation-state="OPEN"],
+        #displayButton[data-display-state="ON"],
+        #displayButton[data-display-state="OPEN"] {
+            background-color: var(--main-color);
+        }
+
+        #conversationButton[data-conversation-state="ON"]:hover,
+        #conversationButton[data-conversation-state="OPEN"]:hover,
+        #displayButton[data-display-state="ON"]:hover,
+        #displayButton[data-display-state="OPEN"]:hover {
+            background-color: #2db6ac;
+        }
+
+        /* 親ボタンの中央上に縦に生えるサブメニュー */
+        .icon-menu {
+            display: none;
+            position: absolute;
+            bottom: calc(100% + 12px);
+            left: 50%;
+            transform: translateX(-50%);
+            flex-direction: column;
+            gap: 8px;
+            z-index: 100;
+        }
+
+        .icon-menu.open {
+            display: flex;
+        }
+
+        .icon-menu button {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            flex-shrink: 0;
+            border: none;
+            color: #fff;
+            background: #999;
+            cursor: pointer;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+            transition: background-color 0.3s ease;
+        }
+
+        /* OFF も ID で指定する（下の視線ボタンの注記と同じ理由。hover が残って OFF でも緑に見えるのを防ぐ） */
+        #fullscreenButton[data-fs-state="OFF"] {
+            background-color: #999;
+        }
+
+        #fullscreenButton[data-fs-state="ON"] {
+            background-color: var(--main-color);
+        }
+
+        /* 視線ボタン（表示メニュー内）。状態は背景色のみ（ON=メイン色・OFF=グレー）。
+           ※OFF も ID で指定する（字幕・リマインダーと同じ）。.icon-menu button のグレーだけだと、
+             詳細度で button:hover が勝ち、スマホではタップ後の hover が残って OFF でも緑に見える（2026-09-27 本人指摘） */
+        #gazeButton[data-gaze-state="OFF"] {
+            background-color: #999;
+        }
+
+        #gazeButton[data-gaze-state="ON"] {
+            background-color: var(--main-color);
+        }
+
+        #gazeButton[data-gaze-state="ON"]:hover {
+            background-color: #2db6ac;
+        }
+
+        /* 無効（カメラOFF / アウトカメラ）: 押せるがグレー。タップで理由をトースト表示（カメラ切替と同じ） */
+        #gazeButton[data-gaze-state="DISABLED"] {
+            background-color: #999;
+            opacity: 0.55;
+        }
+
+        /* カメラ切替ボタン（表示メニュー内）。
+           表示/非表示 = カメラ機能が使える環境か（カメラボタンと同条件・cameraManager が制御）
+           有効/無効   = 今この瞬間に切替できるか（カメラON かつ 2台以上）
+           ※他ボタンと同じく形状は .icon-menu button に任せ、ここは状態色のみ */
+        #cameraSwitchButton[data-switch-state="ON"] {
+            background-color: var(--main-color);
+        }
+
+        #cameraSwitchButton[data-switch-state="ON"]:hover {
+            background-color: #2db6ac;
+        }
+
+        /* 無効（カメラOFF / カメラが1台）: 押せるがグレー。タップで理由をトースト表示 */
+        #cameraSwitchButton[data-switch-state="DISABLED"] {
+            background-color: #999;
+            opacity: 0.55;
+        }
+
+        /* -------------------------------------------
+           カメラプレビュー吹き出し（長押しで出現）
+           ------------------------------------------- */
+
+        /* プレビューパネルの親に position:relative が必要 */
+        .attachment-section {
+            position: relative;
+        }
+
+        #cameraPreview {
+            display: none;
+            position: absolute;
+            bottom: calc(100% + 15px);
+            right: 0;
+            background: white;
+            border: 2px solid var(--main-color);
+            border-radius: 12px;
+            padding: 8px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+            z-index: 100;
+        }
+
+        /* 吹き出しの尻尾（外枠） */
+        #cameraPreview::before {
+            content: '';
+            position: absolute;
+            bottom: -14px;
+            right: 18px;
+            border: 7px solid transparent;
+            border-top-color: var(--main-color);
+        }
+
+        /* 吹き出しの尻尾（内側・白） */
+        #cameraPreview::after {
+            content: '';
+            position: absolute;
+            bottom: -11px;
+            right: 19px;
+            border: 6px solid transparent;
+            border-top-color: white;
+            z-index: 1;
+        }
+
+        #cameraPreview.visible {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+        }
+
+        #cameraPreviewImages {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+        }
+
+        .camera-preview-empty {
+            color: #999;
+            font-size: 12px;
+            padding: 4px 8px;
+            white-space: nowrap;
+        }
+
+        .camera-preview-thumb {
+            position: relative;
+            width: 72px;
+            height: 72px;
+            flex-shrink: 0;
+            border-radius: 8px;
+        }
+
+        .camera-preview-thumb img {
+            width: 72px;
+            height: 72px;
+            object-fit: cover;
+            border-radius: 8px;
+            display: block;
+        }
+
+        .camera-preview-thumb .cam-remove-btn {
+            position: absolute;
+            top: -6px;
+            right: -6px;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #e74c3c;
+            color: white;
+            font-size: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            border: none;
+            padding: 0;
+            z-index: 10;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+        }
+
+        /* -------------------------------------------
+           モバイル対応
+           ------------------------------------------- */
+        @media (max-width: 768px) {
+            :host {
+                display: block;
+                width: 100%;
+                height: auto;
+                max-height: none;
+                overflow: visible;
+            }
+
+            .response-section {
+                border-radius: 0;
+                box-shadow: none;
+                padding: 10px;
+                background: none;
+                max-height: none;
+                overflow: visible;
+            }
+
+            .input-section {
+                margin-top: 10px;
+                flex-wrap: wrap;
+            }
+
+            .attachment-section {
+                margin: 0 !important;
+                padding: 0 0 10px 0 !important;
+                gap: 5px !important;
+            }
+
+            .button-row {
+                gap: 5px;
+            }
+
+            textarea {
+                height: 60px;
+                width: 100%;
+                margin: 0;
+                font-size: 16px;
+                border: 1px solid var(--main-color);
+                border-radius: 10px;
+                padding: 8px;
+            }
+
+            button[type="submit"] {
+                /* width: auto; */
+                /* flex: 1; */
+                width: 100%;
+                padding: 8px;
+                margin: 0;
+                border-radius: 10px;
+                font-size: 14px;
+            }
+
+            #micButton,
+            #cameraButton,
+            #conversationButton,
+            #displayButton,
+            .icon-menu button {
+                width: 45px;
+                height: 45px;
+                font-size: 18px;
+            }
+
+            .mic-level-section {
+                padding: 6px 0 0 0;
+            }
+
+            #attachmentArea {
+                margin-top: 10px;
+            }
+
+            .attachment-item {
+                margin-bottom: 5px;
+            }
+        }
+    </style>
+
+    <!-- Font Awesome を読み込み -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+    <div class="response-section">
+        <form id="generateForm" action="/generate" method="post" enctype="multipart/form-data">
+            <!-- 上段：ファイル添付 -->
+            <div class="attachment-section">
+                <div id="attachmentArea">
+                    <!-- 添付アイテムはJavaScriptで動的に追加されます -->
+                </div>
+                <div class="button-row">
+                <button type="button" id="addAttachmentButton">
+                    <i class="fas fa-plus"></i> 添付追加
+                </button>
+                <!-- マイクボタン: STT有効時のみ表示される。data-mic-stateでCSSの色が変わる。
+                     短押し=OFF/認識/AUTOトグル、長押し(500ms)=マイクパネル（履歴＋音量） -->
+                <button type="button" id="micButton" data-mic-state="OFF" title="マイク">
+                    <i class="fas fa-microphone"></i>
+                </button>
+                <!-- カメラボタン: camera有効時のみ表示。長押しでプレビュー -->
+                <button type="button" id="cameraButton" data-camera-state="OFF" title="カメラ（長押しでプレビュー）">
+                    <i class="fas fa-camera"></i>
+                </button>
+                <!-- 会話メニュー: タップで上にサブボタン（字幕／リマインダー）を展開 -->
+                <div class="menu-anchor">
+                    <button type="button" id="conversationButton" data-conversation-state="OFF" title="会話のやり取り設定（字幕・リマインダー）">
+                        <i class="fas fa-people-arrows"></i>
+                    </button>
+                    <div id="conversationMenu" class="icon-menu">
+                        <!-- 字幕ボタン: ON中は音声・リップシンクを停止して文字で読む（本体は miku-caption） -->
+                        <button type="button" id="captionButton" data-caption-state="OFF" title="字幕表示に切り替える（音声を止めて文字で読む）">
+                            <i class="fas fa-comment-dots"></i>
+                        </button>
+                        <!-- 無応答リマインダーのミュートボタン: ONでミクから話しかけない。既定OFF・永続化なし -->
+                        <button type="button" id="reminderButton" data-reminder-state="OFF" title="無応答リマインダー有効（返信がないと話しかけます）... クリックでミュート">
+                            <i class="fas fa-bell-slash"></i>
+                        </button>
+                    </div>
+                </div>
+                <!-- 表示メニュー: タップで上にサブボタン（カメラ切替／視線／ロック／全画面）を展開 -->
+                <div class="menu-anchor">
+                    <button type="button" id="displayButton" data-display-state="OFF" title="表示メニュー（カメラ切替・視線・画面ロック・全画面）">
+                        <i class="fas fa-desktop"></i>
+                    </button>
+                    <div id="displayMenu" class="icon-menu">
+                        <!-- カメラ切替: 端末のカメラ（イン/アウト/外付け）を順に切り替える。
+                             表示条件はカメラボタンと同じ（cameraManager が制御）。既定は非表示 -->
+                        <button type="button" id="cameraSwitchButton" data-switch-state="DISABLED"
+                                style="display: none;" title="カメラを切り替える">
+                            <i class="fas fa-camera-rotate"></i>
+                        </button>
+                        <!-- 視線追従: カメラONのとき、ミクがマスターの顔の方を向く。既定ON・永続化なし。
+                             表示条件はカメラボタンと同じ（cameraManager が制御）。既定は非表示。
+                             カメラOFFの間は DISABLED（押せるがグレー）で、起動直後はカメラOFFなので DISABLED から始まる -->
+                        <button type="button" id="gazeButton" data-gaze-state="DISABLED"
+                                style="display: none;" title="視線追従はカメラ（インカメラ）がONのときに使えます">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        <button type="button" id="lockButton" title="画面ロック（放置会話・誤操作防止）">
+                            <i class="fas fa-lock"></i>
+                        </button>
+                        <button type="button" id="fullscreenButton" data-fs-state="OFF" title="全画面表示にする">
+                            <i class="fas fa-expand"></i>
+                        </button>
+                    </div>
+                </div>
+                <!-- カメラプレビュー吹き出し（長押しでON、再タップで閉じる） -->
+                <div id="cameraPreview">
+                    <div id="cameraPreviewImages"></div>
+                </div>
+
+                <!-- マイクパネル（マイク長押しでON、再タップで閉じる）: 直近の会話履歴 + レベルメーター -->
+                <div id="micPanel">
+                    <div class="mic-panel-title" id="micPanelTitle">直近の会話</div>
+                    <div id="micPanelHistory"></div>
+                    <!-- 音声レベルメーター: パネル表示中かつマイクON時のみ（OFF時は履歴のみ） -->
+                    <div class="mic-level-section" id="micLevelSection">
+                        <div class="mic-level-row">
+                            <div class="mic-level-track">
+                                <div class="mic-level-fill" id="micLevelFill"></div>
+                            </div>
+                        </div>
+                        <div class="mic-threshold-row">
+                            <span class="mic-threshold-label">閾値</span>
+                            <input type="range" class="mic-threshold-slider" id="micThresholdSlider" min="0" max="100"
+                                value="15" step="1">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 下段：文字の入力欄と応答ボタン（AUTOモード中は .voice-only で非表示になる） -->
+            <div class="input-section">
+                <textarea name="input_text" id="input_text" required placeholder="話しかけてください"></textarea>
+                <button type="submit" id="submitButton">話す</button>
+            </div>
+        </form>
+    </div>
+</template>

@@ -1,0 +1,186 @@
+/*
+ * Watashinosekaito Hatsune Miku
+ * Copyright (c) 2025-2026 ChordDotE. All rights reserved.
+ * SPDX-License-Identifier: LicenseRef-ChordDotE-NonCommercial-2.0
+ *
+ * NON-COMMERCIAL USE ONLY. NO BUSINESS USE. NO ADAPTATION.
+ *
+ * Business use (any use by or for a company, organization, or sole
+ * proprietor, WHETHER OR NOT ANY PAYMENT IS INVOLVED) and publishing or
+ * distributing modified versions are PROHIBITED IN ALL CASES; no permission
+ * is granted for them. Forks may be used only to propose improvements to the
+ * Author (e.g. pull requests). Commercial use, redistribution, and Adaptation
+ * are PROHIBITED without prior written permission. "Adaptation" includes
+ * manual reimplementation, automated translation, and generation using large
+ * language models or other machine learning, of software having equivalent or
+ * similar functionality. Permission is granted individually, in recorded form.
+ * Contact: https://x.com/ChordDotE
+ *
+ * 業務利用（対価の有無を問わず、法人・団体・個人事業主による利用と事業のための利用）と、
+ * 改変版の公開・配布は、許可の余地なく禁止します。フォークは作者への改善の提案
+ * （プルリクエスト等）のためだけに使えます。商用利用・再配布・翻案は、作者の許可が
+ * ない限り禁止します。翻案には、再実装・自動変換・大規模言語モデル等を用いた生成に
+ * よる、同等または類似の機能を持つソフトウェアの作成を含みます。
+ * 許可が必要な場合は、記録の残る形でご連絡ください。
+ *
+ * See LICENSE for full terms. 詳細は LICENSE を参照してください。
+ */
+
+/* ===========================================
+   Miku Agent - メインスタイルシート
+   =========================================== */
+
+/* -------------------------------------------
+   CSS変数（テーマカラー）
+   ------------------------------------------- */
+:root {
+    --main-color: #39c5bb;
+    /* ミクカラー */
+    --light-color: #e6f8f7;
+    /* 背景色（薄いミクカラー） */
+    --bg-color: #ffffff;
+    /* コンテンツ背景色 */
+}
+
+/* -------------------------------------------
+   ベーススタイル（リセット・共通）
+   ------------------------------------------- */
+html,
+body {
+    overflow-x: hidden;
+    width: 100%;
+    position: relative;
+}
+
+body {
+    font-family: "Hiragino Kaku Gothic ProN", "メイリオ", sans-serif;
+    margin: 0;
+    padding: 10px;
+    background-color: var(--light-color);
+    min-height: 100vh;
+    box-sizing: border-box;
+    overflow-x: hidden;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+img,
+video,
+iframe {
+    max-width: 100%;
+    height: auto;
+}
+
+/* -------------------------------------------
+   モバイル対応（768px以下）
+   ------------------------------------------- */
+@media (max-width: 768px) {
+    body {
+        padding: 0;
+        background-color: var(--bg-color);
+        min-height: 100%;
+        height: 100vh;
+        height: 100dvh;
+        /* アドレスバー・ソフトキーボードを考慮。
+           --app-height は main.js の initViewportHeightSync() が visualViewport から設定
+           （iOS Safari は interactive-widget メタ非対応のため JS で追従させる） */
+        height: var(--app-height, 100dvh);
+        overflow: hidden;
+    }
+
+    /* メインコンテナ - モバイル時は縦並び */
+    .container {
+        flex-direction: column;
+        height: 100vh !important;
+        height: 100dvh !important;
+        height: var(--app-height, 100dvh) !important;
+        /* アドレスバー・ソフトキーボードを考慮（--app-height は上記コメント参照） */
+        width: 100%;
+        max-width: 100%;
+        margin: 0;
+        padding: 0;
+        gap: 0;
+        overflow: hidden;
+    }
+
+    /* Web Components - モバイル時 */
+    miku-avatar-live2d {
+        flex: 1 1 auto !important;
+        width: 100% !important;
+        min-height: 0;
+        overflow: hidden;
+    }
+
+    miku-chat {
+        flex: 0 0 auto !important;
+        width: 100% !important;
+        max-height: none !important;
+        overflow: visible !important;
+    }
+
+    /* 返答テキスト字幕アンカー - モバイル時は高さ0の横帯（アバターとチャットの境界） */
+    miku-caption {
+        flex: 0 0 0 !important;
+        width: 100% !important;
+        align-self: auto;
+    }
+
+    /* ※コンポーネント内部（.character-section / .response-section / textarea 等）のスタイルは
+       各コンポーネントの Shadow DOM 内テンプレートが持つ。このファイルはライトDOM
+       （body / .container / カスタム要素ホスト）のみを対象とする */
+}
+
+/* -------------------------------------------
+   メインレイアウト（デスクトップ）
+   ------------------------------------------- */
+
+/* メインコンテナ - 左右2カラムレイアウト */
+.container {
+    display: flex;
+    max-width: 1200px;
+    margin: 0 auto;
+    gap: 0px;
+    height: calc(100vh - 20px);
+    /* bodyのpadding 10px*2を考慮 */
+    background-color: var(--bg-color);
+}
+
+/* -------------------------------------------
+   Web Components用スタイル
+   カスタム要素をflexアイテムとして扱う
+   ホスト要素に元の.character-section/.response-sectionと同じflex設定を適用
+   ------------------------------------------- */
+miku-avatar-live2d {
+    flex: 0 0 600px;
+    /* 元の.character-sectionと同様の幅 */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+miku-chat {
+    flex: 1;
+    display: flex;
+    min-height: 0;
+    /* flexアイテムの縮小を許可 */
+    max-height: 100%;
+    overflow: hidden;
+}
+
+/* 返答テキスト字幕のアンカー（サイズゼロ）。
+   デスクトップ（横並び）ではアバター列とチャット列の間の幅0の縦帯になり、
+   字幕バンドはここから absolute でアバター領域下部へ伸びる（miku-caption.js 参照） */
+miku-caption {
+    flex: 0 0 0;
+    align-self: stretch;
+    display: block;
+    position: relative;
+}
+
+/* ※以下は存在しない。コンポーネント内部のスタイル（.character-section /
+   .response-section / フォーム要素・添付UI・アニメーション等）は、各コンポーネントの
+   Shadow DOM 内テンプレート（miku-avatar-live2d.html / miku-chat.html / miku-caption.js）が持つ。
+   ページCSSは Shadow DOM に届かないため、ここに書いても効かない（旧・単一HTML時代の
+   死にルール約300行を 2026-07-14 に削除） */

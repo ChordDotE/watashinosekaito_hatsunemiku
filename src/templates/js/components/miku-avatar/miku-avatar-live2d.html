@@ -1,0 +1,162 @@
+<!--
+  Watashinosekaito Hatsune Miku
+  Copyright (c) 2025-2026 ChordDotE. All rights reserved.
+  SPDX-License-Identifier: LicenseRef-ChordDotE-NonCommercial-2.0
+
+  NON-COMMERCIAL USE ONLY. NO BUSINESS USE. NO ADAPTATION.
+
+  Business use (any use by or for a company, organization, or sole
+  proprietor, WHETHER OR NOT ANY PAYMENT IS INVOLVED) and publishing or
+  distributing modified versions are PROHIBITED IN ALL CASES; no permission
+  is granted for them. Forks may be used only to propose improvements to the
+  Author (e.g. pull requests). Commercial use, redistribution, and Adaptation
+  are PROHIBITED without prior written permission. "Adaptation" includes
+  manual reimplementation, automated translation, and generation using large
+  language models or other machine learning, of software having equivalent or
+  similar functionality. Permission is granted individually, in recorded form.
+  Contact: https://x.com/ChordDotE
+
+  業務利用（対価の有無を問わず、法人・団体・個人事業主による利用と事業のための利用）と、
+  改変版の公開・配布は、許可の余地なく禁止します。フォークは作者への改善の提案
+  （プルリクエスト等）のためだけに使えます。商用利用・再配布・翻案は、作者の許可が
+  ない限り禁止します。翻案には、再実装・自動変換・大規模言語モデル等を用いた生成に
+  よる、同等または類似の機能を持つソフトウェアの作成を含みます。
+  許可が必要な場合は、記録の残る形でご連絡ください。
+
+  See LICENSE for full terms. 詳細は LICENSE を参照してください。
+-->
+
+<!--
+  miku-avatar-live2d.html - アバター表示コンポーネント（Live2D iframe版）
+  
+  機能:
+  - Live2Dモデルをiframeで表示
+  - 状態に応じたスタイル切り替え（idle, thinking, speaking）
+  - レスポンシブ対応
+-->
+<template>
+    <style>
+        :host {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+
+        .character-section {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+            /* 背景色（Live2Dは透過なのでここで設定） */
+            background: white;
+        }
+
+        /* Live2D表示用iframe */
+        #live2d-iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            /* iframeの背景を透過にする */
+            background: transparent;
+        }
+
+        /* 状態に応じたエフェクト（オプション） */
+        .character-section.thinking::after {
+            content: '';
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            width: 30px;
+            height: 30px;
+            border: 3px solid rgba(57, 197, 187, 0.3);
+            border-top-color: #39C5BB;
+            border-radius: 50%;
+            animation: thinking-spin 1s linear infinite;
+            pointer-events: none;
+        }
+
+        @keyframes thinking-spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* speaking状態でのグロー効果（オプション） */
+        .character-section.speaking {
+            /* box-shadow: 0 0 20px rgba(57, 197, 187, 0.3) inset; */
+        }
+
+        /* Live2D が表示できない場合は、iframe 側（/live2d）が案内画面を返す。
+           静止画のフォールバックは持たない（公式イラストは再配布できず、
+           Live2D は必須機能なので「代わりの絵」で成立させるべきものでもない） */
+
+        /* ローディング表示 */
+        .loading-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            transition: opacity 0.5s ease;
+            pointer-events: none;
+        }
+
+        .loading-overlay.hidden {
+            opacity: 0;
+        }
+
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid rgba(57, 197, 187, 0.2);
+            border-top-color: #39C5BB;
+            border-radius: 50%;
+            animation: loading-spin 1s linear infinite;
+        }
+
+        @keyframes loading-spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* モバイル対応
+           ※かつて .character-section { min-height: 40vh } を指定していたが、
+           ソフトキーボード・添付追加でホスト（flex）が 40vh より縮んだ際に
+           中身の canvas が 40vh のまま残り、overflow: hidden で足元だけが
+           クリップされる原因になっていたため削除（2026-07-29）。
+           サイズはホストの flex 縮小に完全追従させ、全身表示は Live2D 側の
+           contain フィット（apply_patches.ps1 の lapplive2dmanager パッチ）が保証する */
+    </style>
+
+    <div class="character-section idle">
+        <!-- Live2D iframe -->
+        <iframe id="live2d-iframe" src="/live2d" allow="autoplay" title="Live2D Avatar"></iframe>
+
+        <!-- ローディングオーバーレイ -->
+        <div class="loading-overlay" id="loading-overlay">
+            <div class="loading-spinner"></div>
+        </div>
+    </div>
+</template>
+
+<script>
+    // テンプレート内スクリプト（iframeロード完了時の処理）
+    // ※このスクリプトはShadow DOM内で実行されるため、
+    // 実際の処理はmiku-avatar-live2d.jsで行う
+</script>

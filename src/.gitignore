@@ -4,9 +4,13 @@ conversations/
 saved_models/
 temp_voice/
 state_logs/
-memory/
 *_pycache__*
 settings.json
+settings.json.bak
+settings.json.tmp
 pyvenv.cfg
 /test_*
 KV/
+# 画面側の第三者ライブラリ（MediaPipe・Mediabunny）。同梱せず、セットアップ
+# （setup_common.ps1 の Install-MikuWebVendor）が公式の配布元から取得して照合して置く（2026-10-08）
+templates/js/vendor/

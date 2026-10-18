@@ -1,0 +1,55 @@
+name: 不具合の報告
+description: うまく動かないときに教えてください
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        個人が趣味で作っているものなので、**必ず直せるとは限りません**。
+        それでも、環境によっては気づいていない不具合があるので、報告はとても助かります。
+
+        ⚠️ **APIキーと、個人的な会話の中身は消してから**貼り付けてください。
+
+  - type: input
+    id: version
+    attributes:
+      label: バージョン
+      description: スタート画面か、フォルダ内の VERSION ファイルに書いてあります
+      placeholder: "0.2.0"
+    validations:
+      required: true
+
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: 何が起きましたか
+      description: できれば「何をしたら」「何が起きて」「どうなってほしかったか」の順で
+      placeholder: |
+        マイクで話しかけたら、ミクが考えたまま何も言わなくなりました。
+    validations:
+      required: true
+
+  - type: textarea
+    id: error
+    attributes:
+      label: 画面に出たエラー
+      description: |
+        ミクが「エラーが出てるみたい」と言った場合は、その文面をそのまま貼ってください。
+        （例: `[Google AI Studio] クレジット残高が空のようです（payment_required / 402）`）
+      render: text
+
+  - type: textarea
+    id: log
+    attributes:
+      label: ログ
+      description: |
+        スタート画面の「ログ」タブの、エラーが出た前後の数行を貼ってください。
+        **APIキーと会話の中身は消してから**お願いします。
+      render: text
+
+  - type: input
+    id: env
+    attributes:
+      label: 環境
+      description: Windows のバージョンと、GPU の有無
+      placeholder: "Windows 11 / NVIDIA GPU なし"

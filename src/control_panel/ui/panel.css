@@ -1,0 +1,227 @@
+/*
+ * Watashinosekaito Hatsune Miku
+ * Copyright (c) 2025-2026 ChordDotE. All rights reserved.
+ * SPDX-License-Identifier: LicenseRef-ChordDotE-NonCommercial-2.0
+ *
+ * NON-COMMERCIAL USE ONLY. NO BUSINESS USE. NO ADAPTATION.
+ *
+ * Business use (any use by or for a company, organization, or sole
+ * proprietor, WHETHER OR NOT ANY PAYMENT IS INVOLVED) and publishing or
+ * distributing modified versions are PROHIBITED IN ALL CASES; no permission
+ * is granted for them. Forks may be used only to propose improvements to the
+ * Author (e.g. pull requests). Commercial use, redistribution, and Adaptation
+ * are PROHIBITED without prior written permission. "Adaptation" includes
+ * manual reimplementation, automated translation, and generation using large
+ * language models or other machine learning, of software having equivalent or
+ * similar functionality. Permission is granted individually, in recorded form.
+ * Contact: https://x.com/ChordDotE
+ *
+ * 業務利用（対価の有無を問わず、法人・団体・個人事業主による利用と事業のための利用）と、
+ * 改変版の公開・配布は、許可の余地なく禁止します。フォークは作者への改善の提案
+ * （プルリクエスト等）のためだけに使えます。商用利用・再配布・翻案は、作者の許可が
+ * ない限り禁止します。翻案には、再実装・自動変換・大規模言語モデル等を用いた生成に
+ * よる、同等または類似の機能を持つソフトウェアの作成を含みます。
+ * 許可が必要な場合は、記録の残る形でご連絡ください。
+ *
+ * See LICENSE for full terms. 詳細は LICENSE を参照してください。
+ */
+
+/* コントロールパネルの見た目。Windows のアプリらしい素直な作りにする */
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: "Yu Gothic UI", "Meiryo", system-ui, sans-serif;
+  background: #eef1f5;
+  color: #1c1e21;
+  font-size: 13px;
+}
+
+.tabs {
+  display: flex;
+  background: #f7f8fa;
+  border-bottom: 1px solid #e2e6ec;
+  padding: 0 8px;
+}
+.tab {
+  padding: 10px 16px;
+  font: inherit;
+  font-size: 12.5px;
+  color: #5a6472;
+  background: none;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+}
+.tab.active { color: #0b6cbf; border-bottom-color: #0b6cbf; background: #fff; font-weight: 600; }
+
+.panel { padding: 16px 18px 20px; }
+.hidden { display: none; }
+
+/* 状態バナー */
+.status {
+  display: flex; align-items: center; gap: 12px;
+  padding: 14px 16px; border-radius: 6px; margin-bottom: 14px;
+}
+.status.on  { background: #e8f6ec; border: 1px solid #b7e0c2; }
+.status.off { background: #f2f3f5; border: 1px solid #dde1e6; }
+/* 起動・停止の処理中（数十秒〜数分かかる）。動作中とも停止中とも違う色で待ちだと分かるように */
+.status.busy { background: #fff6e3; border: 1px solid #f0ddb4; }
+.status .stateico { font-size: 22px; line-height: 1; }
+.status .txt strong { display: block; font-size: 16px; }
+.status .txt span { font-size: 11.5px; color: #5a6472; }
+
+.btnrow { display: flex; gap: 10px; margin-bottom: 14px; flex-wrap: wrap; }
+button {
+  font-family: inherit; font-size: 12.5px; padding: 8px 16px;
+  border-radius: 4px; border: 1px solid #c3c9d2; background: #fff; color: #24292f;
+  cursor: pointer;
+}
+button:hover:not(:disabled) { background: #f2f7fb; }
+button.primary { background: #0b6cbf; border-color: #0b6cbf; color: #fff; font-weight: 600; }
+button.primary:hover:not(:disabled) { background: #0a5da5; }
+button.danger { border-color: #d0454c; color: #c0392b; }
+button.danger:hover:not(:disabled) { background: #fdf2f2; }
+button:disabled { color: #a5adb8; background: #f5f6f8; border-color: #dde1e6; cursor: default; }
+
+/* オプション */
+.opt {
+  display: flex; gap: 9px; align-items: flex-start;
+  background: #f7f8fa; border: 1px solid #e2e6ec; border-radius: 4px;
+  padding: 9px 11px; margin-bottom: 10px; line-height: 1.5; cursor: pointer;
+}
+.opt input { margin-top: 2px; }
+.opt span { display: block; color: #6b7684; font-size: 11px; margin-top: 3px; }
+
+.sect {
+  font-size: 11.5px; color: #6b7684; font-weight: 600;
+  margin: 16px 0 6px; letter-spacing: .04em;
+}
+
+/* 黒いコンソールが付いてきたときの注意（閉じるとパネルごと落ちる） */
+.console-note {
+  font-size: 11.5px; color: #7a5310; line-height: 1.6; margin: 0 0 12px;
+  padding: 9px 12px; background: #fdf7ea; border: 1px solid #f0dcba; border-radius: 5px;
+}
+
+/* アクセス先 */
+.url {
+  display: flex; align-items: center; gap: 8px; font-size: 12px;
+  padding: 7px 10px; background: #f7f8fa; border: 1px solid #e2e6ec;
+  border-radius: 4px; margin-bottom: 6px;
+}
+.url .lbl { color: #6b7684; width: 84px; flex: none; }
+.url code { flex: 1; font-family: Consolas, monospace; word-break: break-all; }
+.url button { padding: 3px 9px; font-size: 11px; }
+.url.empty { color: #98a2b0; }
+
+/* 進捗表示。画面下に固定し、どのタブを見ていても進行が分かるようにする。
+   何もしていないときは hidden で丸ごと消す（常時空欄が居座らないように） */
+.progress {
+  position: fixed; left: 0; right: 0; bottom: 0;
+  padding: 9px 18px 11px;
+  background: #f7f8fa; border-top: 1px solid #e2e6ec;
+}
+/* 表示中は下端が隠れないよう本文に余白を作る */
+body:has(.progress:not(.hidden)) { padding-bottom: 64px; }
+.progress .pbar {
+  height: 6px; border-radius: 3px; background: #e2e6ec; overflow: hidden;
+}
+.progress .pfill {
+  height: 100%; width: 0; background: #0b6cbf;
+  transition: width 0.3s ease;
+}
+.progress .pstep {
+  font-size: 11.5px; color: #1c1e21; font-weight: 600; margin: 7px 0 0;
+}
+.progress .pline {
+  font-size: 11px; color: #6b7684; margin: 3px 0 0;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+
+.badge { font-size: 11px; padding: 3px 9px; border-radius: 10px; flex: none; white-space: nowrap; }
+.badge.ok { background: #e8f6ec; color: #1c7a3c; border: 1px solid #b7e0c2; }
+.badge.no { background: #f2f3f5; color: #6b7684; border: 1px solid #dde1e6; }
+.badge.warn { background: #fdf3e3; color: #9a6413; border: 1px solid #f0dcba; }
+
+/* 設定タブ ------------------------------------------------------------------
+   機能の導入も細かな調整も1枚にまとめる。項目が多いので既定は畳んでおき、
+   「ミクにできること」だけ開いた状態で始める（open は Python 側が決める） */
+.settings-note {
+  font-size: 11.5px; color: #5a6472; margin: 0 0 10px; line-height: 1.6;
+  background: #f7f8fa; border: 1px solid #e2e6ec; border-radius: 4px; padding: 8px 11px;
+}
+#settings { padding-bottom: 56px; }   /* 固定の保存バーに隠れないように */
+
+.group { border: 1px solid #e2e6ec; border-radius: 5px; margin-bottom: 9px; }
+.group > summary {
+  display: flex; align-items: center; gap: 8px; list-style: none; cursor: pointer;
+  padding: 9px 12px; background: #f7f8fa; font-weight: 600; font-size: 12.5px;
+}
+.group > summary::-webkit-details-marker { display: none; }
+.group > summary::before { content: "\25B6"; color: #98a2b0; font-size: 10px; }
+.group[open] > summary::before { content: "\25BC"; }
+.group > summary .sub { font-weight: 400; color: #7b8794; font-size: 11.5px; margin-left: auto; }
+.gbody { padding: 4px 12px 10px; }
+
+.srow { padding: 11px 0; border-bottom: 1px solid #eef1f4; }
+.srow:last-child { border-bottom: 0; }
+
+/* 機能の行 */
+.fhead { display: flex; align-items: center; gap: 10px; }
+.finfo { flex: 1; min-width: 0; }
+.fname { font-weight: 600; font-size: 12.5px; }
+.fdesc { color: #6b7684; font-size: 11.5px; margin-top: 3px; line-height: 1.55; }
+.fnote { color: #8b6b23; font-size: 11.5px; margin-top: 6px; line-height: 1.5; }
+.flink { color: #0b6cbf; font-size: 11.5px; margin-top: 5px; word-break: break-all; }
+.field { margin-top: 8px; }
+
+/* 入力欄。ラベル幅を揃えて、説明はその下に回す */
+.fline { display: flex; align-items: center; gap: 10px; }
+.fline > label { width: 210px; flex: none; color: #4a5462; font-size: 12px; line-height: 1.45; }
+.fline input[type=text], .fline input[type=password],
+.fline input[type=number], .fline select {
+  flex: 1; min-width: 0; padding: 5px 8px; border: 1px solid #ccd2da;
+  border-radius: 4px; font: inherit; font-size: 12px; background: #fff;
+}
+/* flex:1 が効くと横に伸びてラベルが右へ飛ぶ */
+.fline input[type=checkbox] { flex: none; width: 15px; height: 15px; accent-color: #0b6cbf; }
+.fline .unit { color: #7b8794; font-size: 11.5px; flex: none; }
+.fline button { padding: 4px 10px; font-size: 11.5px; }
+.field .fdesc, .srow.field .fdesc { margin-left: 220px; }
+button.maint { margin: 6px 0 0 220px; padding: 3px 9px; font-size: 11.5px; }
+
+/* 保存バー。項目が多く画面外まで伸びるので、下端に固定する */
+.savebar {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 2;
+  display: flex; align-items: center; gap: 10px;
+  padding: 9px 18px; background: #f7f8fa; border-top: 1px solid #e2e6ec;
+}
+.savebar .save-msg { flex: 1; font-size: 11.5px; color: #5a6472; }
+.savebar .save-msg.error { color: #b3261e; }
+/* 進捗バーが出ているときは、その上に重ねる */
+body:has(.progress:not(.hidden)) .savebar { bottom: 64px; }
+
+/* ログ */
+#log {
+  background: #1e222a; color: #cdd6e0;
+  font-family: Consolas, monospace; font-size: 11px; line-height: 1.6;
+  padding: 12px; border-radius: 4px; margin: 0;
+  height: 520px; overflow: auto; white-space: pre-wrap; word-break: break-all;
+}
+
+/* --- お問い合わせ・お知らせ（2026-09-22）---
+   行き先は index.html の data-url が持ち、panel.js が open_url で外部ブラウザへ渡す。
+   声で URL は伝えられないので、**画面が URL を持つ**のがこの節の役割 */
+.links { display: flex; flex-direction: column; gap: 6px; }
+.linkrow {
+  display: flex; align-items: center; gap: 10px; width: 100%;
+  padding: 9px 11px; text-align: left; font-size: 12px;
+  background: #fff; border: 1px solid #dfe3e8; border-radius: 6px; cursor: pointer;
+}
+.linkrow:hover { background: #f5f8fb; border-color: #c9d2dc; }
+.linkrow .ico { font-size: 15px; flex: none; }
+.linkrow .body { flex: 1; display: block; }
+.linkrow .body strong { display: block; font-weight: 600; color: #223; }
+.linkrow .body span { display: block; color: #6b7684; font-size: 11px; margin-top: 2px; }
+.linkrow .ext { color: #98a2b0; flex: none; }

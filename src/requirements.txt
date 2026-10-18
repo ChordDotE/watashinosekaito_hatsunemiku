@@ -3,15 +3,12 @@ flask==3.1.0
 pyaudio==0.2.14
 av==13.1.0
 aiortc==1.10.1
-cryptography==44.0.2
 
 requests==2.32.3
 
-# LangGraph
-langgraph==0.3.25
-langchain_openai==0.3.12
-typing_extensions==4.12.2
-langchain==0.3.23
+# コントロールパネル（起動・停止のネイティブGUI）
+# Windows では OS 標準の WebView2 で描画するため追加のランタイム導入は不要
+pywebview==6.2.1
 
 # voice
 sounddevice==0.5.1
@@ -24,11 +21,48 @@ pytest==8.3.5
 pytest-cov==6.1.1
 
 # vector store
-langmem==0.0.25
-psycopg2==2.9.10
-langchain-huggingface==0.1.2
-chromadb==0.6.3
-langchain-chroma==0.2.3
+chromadb==1.5.8
 
 # voice
 flask-socketio==5.5.1
+
+# Gateway Service (WebSocket)
+flask-sock==0.7.0
+
+# STT Service (音声認識) — Fish Audio のクラウド ASR を使うので、ここに入れるものは無い。
+# ローカル版（faster-whisper＋CUDA ライブラリ3つ・約1.7GB）は 2026-09-25 に削除した。
+# 作曲のカバーが使う faster-whisper は song_service 側の venv が持っている（requirements_original.txt 等）
+
+# Pydantic AI (agent framework) - Dify WF 移植後の新実装で使用
+pydantic-ai-slim[anthropic,google]==1.107.6
+pydantic==2.13.3
+# pydantic_ai が使用量（トークン数）の取り出しに使う。**版を固定する**——0.1.x は取り出し結果に
+# pydantic_ai 1.107.6 が受け取れない項目（input_text_tokens 等）を足しており、そのとき pydantic_ai は
+# 例外を握りつぶして入力・出力トークンを 0 で返す（2026-09-22 の版上げで固定が外れて 0.1.7 が入り、
+# 使用量の記録が 0 になっていた。2026-10-08）。song_service 側も同じ 0.0.66
+genai-prices==0.0.66
+
+# Knowledge Base (Chroma + 親子チャンキング + BM25 ハイブリッド検索)
+# 埋め込みは Gemini Embedding API（google-genai）で行うためローカルモデルは不要。
+# 2026-06-07 に bge-m3 から移行しており、2026-08-26 に残っていた sentence-transformers を削除した
+# （ソース全体で未使用・他パッケージからの必須依存も無いことを確認。docs/plan/search_latency_investigation.md §6）
+rank_bm25==0.2.2
+# chromadb は既に vector store セクションに記載済み
+
+# MCP サーバー
+fastmcp==3.2.4
+
+# Fish Audio TTS (PCM ストリーミング)
+fish-audio-sdk==1.3.0
+httpx-ws==0.9.0
+anyio==4.13.0
+
+# Face Recognition (MTCNN + InceptionResnetV1/VGGFace2。torch 本体は requirements2)
+# 2.6.0 は numpy<2 制約があるため 2.5.3 に固定（numpy 2.x と共存できる最新版）
+facenet-pytorch==2.5.3
+# 話者照合（マスターの声の同定・CPU 動作。torch は requirements2.txt 側）
+speechbrain==1.1.0
+
+# Smart Turn v3 終話判定（stt_smart_turn.py / P1）
+# モデル本体は setup が HF から取得（miku/data/models/smart_turn/・BSD-2）
+onnxruntime==1.24.4

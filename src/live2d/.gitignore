@@ -1,0 +1,18 @@
+# Live2D .gitignore
+# ライセンス上、再配布禁止のファイルを除外
+
+# ==========================================
+# Cubism SDK for Web（ユーザーが各自ダウンロード）
+# https://www.live2d.com/sdk/download/web/
+# ==========================================
+CubismWebSamples/
+node_modules/
+
+
+
+# ==========================================
+# 描画ライブラリ（pixi.js / pixi-live2d-display）
+# 同梱せず、セットアップ（setup_common.ps1 の Install-MikuWebVendor）が
+# npm の公式配布元から版を固定して取得し、SHA256 で照合して置く（2026-10-08）
+# ==========================================
+vendor/

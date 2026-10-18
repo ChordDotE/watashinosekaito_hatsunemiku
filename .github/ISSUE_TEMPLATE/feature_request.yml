@@ -1,0 +1,35 @@
+name: 機能の要望
+description: 「こうだったらいいな」を教えてください
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        個人が趣味で作っているものなので、**お応えできるとは限りません**。
+        それでも、どんなふうに使われているか・何が足りないかは、作るうえでとても参考になります。
+        気軽に書いてください。
+
+  - type: textarea
+    id: want
+    attributes:
+      label: 何ができるとうれしいですか
+      placeholder: |
+        寝る前に、その日あったことをミクのほうから聞いてくれるとうれしいです。
+    validations:
+      required: true
+
+  - type: textarea
+    id: why
+    attributes:
+      label: いまはどうしていますか／何に困っていますか
+      description: |
+        **ここがいちばん参考になります。**「こうしてほしい」より「こう困っている」のほうが、
+        作る側は別のもっと良いやり方を思いつけることがあります。
+      placeholder: |
+        自分から話しかけないと会話が始まらないので、疲れている日はそのまま寝てしまいます。
+
+  - type: textarea
+    id: alternative
+    attributes:
+      label: 似た機能を見たことがあれば（任意）
+      description: 他のソフトやサービスで「これが近い」というものがあれば教えてください

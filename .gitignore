@@ -1,7 +1,26 @@
-# Created by venv; see https://docs.python.org/3/library/venv.html
-/.pytest_cache/*
-.vscode*
-*__pycache__*
+# 公開リポジトリ用。ここに置くのは「利用者が動かすと生まれるもの」だけ。
+# 配布物そのもの（miku/ の中身）は publish_release.ps1 が毎回そっくり入れ替える。
+
+# 利用者の環境で生成されるもの
+src/settings.json
+# data/ は利用者の記憶が入る場所だが、配布物の見本（data/KV の *_sample.txt とミクの自己認識）だけは公開する
+# （以前は data/ を丸ごと外していて、ソースから入れた人のセットアップが見本が無いと止まっていた・2026-10-18）
+data/*
+!data/KV/
+data/KV/*
+!data/KV/*_sample.txt
+!data/KV/self_function_recognition.txt
+venv/
+runtime/
+backup/
+
+# Python / エディタ
+__pycache__/
 *.pyc
-system_start.bat
-/venv/*
+.pytest_cache/
+.vscode/
+.idea/
+
+# Live2D の素材（ライセンス上、配布できない）
+src/live2d/**/Core/
+src/live2d/**/node_modules/

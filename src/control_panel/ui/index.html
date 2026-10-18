@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<!--
+  Watashinosekaito Hatsune Miku
+  Copyright (c) 2025-2026 ChordDotE. All rights reserved.
+  SPDX-License-Identifier: LicenseRef-ChordDotE-NonCommercial-2.0
+
+  NON-COMMERCIAL USE ONLY. NO BUSINESS USE. NO ADAPTATION.
+
+  Business use (any use by or for a company, organization, or sole
+  proprietor, WHETHER OR NOT ANY PAYMENT IS INVOLVED) and publishing or
+  distributing modified versions are PROHIBITED IN ALL CASES; no permission
+  is granted for them. Forks may be used only to propose improvements to the
+  Author (e.g. pull requests). Commercial use, redistribution, and Adaptation
+  are PROHIBITED without prior written permission. "Adaptation" includes
+  manual reimplementation, automated translation, and generation using large
+  language models or other machine learning, of software having equivalent or
+  similar functionality. Permission is granted individually, in recorded form.
+  Contact: https://x.com/ChordDotE
+
+  業務利用（対価の有無を問わず、法人・団体・個人事業主による利用と事業のための利用）と、
+  改変版の公開・配布は、許可の余地なく禁止します。フォークは作者への改善の提案
+  （プルリクエスト等）のためだけに使えます。商用利用・再配布・翻案は、作者の許可が
+  ない限り禁止します。翻案には、再実装・自動変換・大規模言語モデル等を用いた生成に
+  よる、同等または類似の機能を持つソフトウェアの作成を含みます。
+  許可が必要な場合は、記録の残る形でご連絡ください。
+
+  See LICENSE for full terms. 詳細は LICENSE を参照してください。
+-->
+
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>ワタシノセカイト初音ミク ― スタート画面</title>
+<link rel="stylesheet" href="panel.css">
+</head>
+<body>
+
+<div class="tabs">
+  <button class="tab active" data-tab="home">ホーム</button>
+  <button class="tab" data-tab="settings">設定</button>
+  <button class="tab" data-tab="log">ログ</button>
+</div>
+
+<section id="tab-home" class="panel">
+  <div id="status" class="status off">
+    <div class="stateico" id="state-icon">💤</div>
+    <div class="txt">
+      <strong id="state-label">確認しています…</strong>
+      <span id="state-sub">&nbsp;</span>
+    </div>
+  </div>
+
+  <!-- 起動時にコンソールが付いてきたときだけ出す。閉じるとこの画面ごと落ちるため -->
+  <p class="console-note hidden" id="console-note">
+    ⚠ 後ろに黒い画面が出ている場合、<strong>閉じないでください</strong>。
+    閉じるとこの画面も一緒に終了します（Windows キー ＋ D でまとめてしまえます）。
+  </p>
+
+  <div class="btnrow">
+    <button id="btn-start" class="primary">起動</button>
+    <button id="btn-stop" class="danger">停止</button>
+    <button id="btn-open">ブラウザで開く</button>
+    <button id="btn-settings">設定</button>
+  </div>
+
+  <label class="opt">
+    <input type="checkbox" id="opt-skip-memory">
+    <div>
+      起動時に記憶の整理をスキップする
+      <span>前回の会話を長期記憶へまとめる処理を省いて、すぐ話し始められます</span>
+    </div>
+  </label>
+
+  <label class="opt" id="opt-tunnel-row">
+    <input type="checkbox" id="opt-keep-tunnel">
+    <div>
+      停止してもアクセスURLを保つ
+      <span>再起動しても同じURLで繋がります（スマホへの共有をやり直さずに済みます）</span>
+    </div>
+  </label>
+
+  <p class="sect">アクセス先</p>
+  <div id="urls"></div>
+
+  <p class="sect">お問い合わせ・お知らせ</p>
+  <div class="links">
+    <button class="linkrow" data-url="https://github.com/ChordDotE/watashinosekaito_hatsunemiku#-ミクが返事をしてくれないときエラーの調べ方">
+      <span class="ico">🔎</span>
+      <span class="body"><strong>うまく動かないとき</strong>
+        <span>まずはこちら（アカウントは要りません）。多くはここで解決します</span></span>
+      <span class="ext">↗</span>
+    </button>
+    <button class="linkrow" data-url="https://github.com/ChordDotE/watashinosekaito_hatsunemiku/issues">
+      <span class="ico">🐞</span>
+      <span class="body"><strong>不具合の報告</strong>
+        <span>GitHub の Issue。「ログ」タブの内容を添えると助かります（難しければ X でも）</span></span>
+      <span class="ext">↗</span>
+    </button>
+    <button class="linkrow" data-url="https://github.com/ChordDotE/watashinosekaito_hatsunemiku/issues">
+      <span class="ico">💡</span>
+      <span class="body"><strong>機能の要望</strong>
+        <span>「こうだったらいいな」を GitHub の Issue へ。お応えできるとは限りません</span></span>
+      <span class="ext">↗</span>
+    </button>
+    <button class="linkrow" data-url="https://x.com/ChordDotE">
+      <span class="ico">💬</span>
+      <span class="body"><strong>感想・作った曲の共有</strong>
+        <span>X（@ChordDotE）へ。#ワタシノセカイト初音ミク を付けてもらえると嬉しいです</span></span>
+      <span class="ext">↗</span>
+    </button>
+    <button class="linkrow" data-url="https://www.youtube.com/@ChordDotE">
+      <span class="ico">📺</span>
+      <span class="body"><strong>お知らせ・動画</strong>
+        <span>YouTube（@ChordDotE）。更新のお知らせはこちらです</span></span>
+      <span class="ext">↗</span>
+    </button>
+  </div>
+</section>
+
+<section id="tab-settings" class="panel hidden">
+  <p class="settings-note">
+    変更はシステムの再起動時に反映されます（停止中でも編集できます）。<br>
+    導入をともなう項目は、<strong>システムを停止してから</strong>操作してください。
+  </p>
+  <div id="settings"></div>
+  <div class="savebar">
+    <span class="save-msg" id="save-msg"></span>
+    <button id="btn-restart" hidden></button>
+    <button id="btn-save" class="primary" disabled>保存</button>
+  </div>
+</section>
+
+<section id="tab-log" class="panel hidden">
+  <div class="btnrow">
+    <button id="btn-reload-log">最新に更新</button>
+    <button id="btn-open-log">ログの場所を開く</button>
+  </div>
+  <pre id="log">読み込んでいます…</pre>
+</section>
+
+<!-- 進捗はタブの外に置く。導入を始めてから他のタブを見にいくことがあり、
+     タブの中に置くと進行が見えなくなるため -->
+<div class="progress hidden" id="progress">
+  <div class="pbar"><div class="pfill" id="pfill"></div></div>
+  <p class="pstep" id="pstep"></p>
+  <p class="pline" id="pline"></p>
+</div>
+
+<script src="panel.js"></script>
+</body>
+</html>

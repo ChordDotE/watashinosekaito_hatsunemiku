@@ -1,0 +1,14 @@
+{
+    "name": "miku-live2d",
+    "version": "1.0.0",
+    "description": "Live2D component for Miku Agent",
+    "type": "module",
+    "scripts": {
+        "build": "tsc && node esbuild.config.js",
+        "watch": "tsc --watch"
+    },
+    "devDependencies": {
+        "esbuild": "^0.20.2",
+        "typescript": "^5.9.3"
+    }
+}

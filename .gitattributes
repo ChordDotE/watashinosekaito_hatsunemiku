@@ -1,3 +1,3 @@
-# setup_interactive.batファイルのみShift_JIS（CP932）として扱う
-setup_interactive.bat text eol=crlf working-tree-encoding=cp932
-system_start_sample.bat text eol=crlf working-tree-encoding=cp932
+# 公開リポジトリ用。配布物（miku/）の中身をリポジトリ直下へ展開するので、
+# 改行コードは Git に触らせない（PowerShell / bat / Python をそのまま配る）。
+* -text

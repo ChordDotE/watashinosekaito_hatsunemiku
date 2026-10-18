@@ -1,53 +1,775 @@
-ワタシノセカイト初音ミク 利用許諾契約
+﻿ワタシノセカイト初音ミク 利用許諾契約
+Watashinosekaito Hatsune Miku - End User License Agreement
 
-重要: このソフトウェアを使用する前に、以下の利用許諾契約を必ずお読みください。
+Copyright (c) 2025-2026 ChordDotE. All rights reserved.
 
-適用範囲
-本ライセンスは、本配布パッケージに含まれるソースコード、設定ファイル、ドキュメント、画像ファイル等のすべてのファイルに適用されます。
+版: 2.0
+発効日: 2026-09-20
+SPDX-License-Identifier: LicenseRef-ChordDotE-NonCommercial-2.0
 
-注意: 本ライセンスは以下には適用されません：
-- VOICEVOX（別途VOICEVOXのライセンスが適用）
-- RVC（別途RVCのライセンスが適用）
-- 初音ミクキャラクター（クリプトン・フューチャー・メディア株式会社等の権利）
-- 外部依存ライブラリ（各ライブラリのライセンスが適用）
+NON-COMMERCIAL USE ONLY. NO BUSINESS USE. NO ADAPTATION.
+NO PUBLISHING OR DISTRIBUTION OF MODIFIED VERSIONS.
+業務利用、および改変版の公開・配布を禁止します。商用利用・翻案は作者の許可がない限り禁止します。
 
-許可される利用
+================================================================================
+日本語（正文）
+================================================================================
 
-個人利用
-- 個人での自由な利用
-- 個人での改変（配布ファイル内のすべてのファイルが対象）
-- 収益化を伴わない配信・投稿（YouTube、X等のSNS投稿を含む）
+重要: 本ソフトウェアをインストールまたは使用する前に、本契約を必ずお読みください。
 
-制限される利用
 
-商用利用
-以下の行為には事前の書面（XのDMなどでも可）による許可が必要です：
-- 金銭を受け取るすべての行動
-- YouTube等での収益化配信
-- 設置サポートサービス
-- サーバー提供サービス
-- その他、直接的・間接的に金銭的利益を得る行為
+第0条 同意
 
-配布・再配布
-- 改変物の配布：禁止
-- 二次配布：禁止
-- 商用・非商用を問わず、本ソフトウェアの無許可の再配布は禁止
+  (1) 利用者は、次の時点で、それぞれに定める版（本ファイルの冒頭に記載する版番号
+      および発効日により識別します）の本契約のすべての条項に同意したものとします。
+      同意できない場合は、インストール、取得および使用を行わないでください。
+        一 インストーラを使用する場合: インストール時に同意の意思表示を行った時点で、
+           そのとき表示された版
+        二 インストーラを使用しない場合（公開リポジトリのソースコードから使用する
+           場合、改善の提案のためにフォークする場合等）: 本ソフトウェアを取得し
+           （ダウンロード、git clone およびフォークを含みます）、または最初に
+           使用した時点で、本ソフトウェアに同梱されていた版
+        三 本ソフトウェアの新しい版を導入した場合（上書きインストール、更新等）:
+           導入した時点で、そのとき表示され、または同梱されていた版
+  (2) 利用者が未成年者である場合は、親権者その他の法定代理人の同意を得たうえで
+      インストールおよび使用を行ってください。本ソフトウェアの利用には、第三者
+      サービスの従量課金が伴う場合があります（第8条第(1)号）。また、本ソフトウェアが
+      使用する第三者のサービス（Google AI Studio〔Gemini API〕、Fish Audio 等）に
+      年齢その他の利用条件がある場合は、それぞれの条件に従ってください（第3条第(2)号）。
 
-商用利用許可申請
-商用利用をご希望の場合は、以下にご相談ください：
-- X（Twitter）: https://x.com/ChordDotE
 
-免責事項
-- 本ソフトウェアは「現状のまま」提供されます
-- 作者は本ソフトウェアの使用により生じたいかなる損害についても責任を負いません
-- 本ソフトウェアの動作保証はありません
+第1条 定義
 
-第三者権利の尊重
-- 本プロジェクトはクリプトン・フューチャー・メディア株式会社等の公式プロジェクトではありません
-- 初音ミクキャラクターの利用については、クリプトン・フューチャー・メディア株式会社のガイドラインに従ってください
-- VOICEVOX、RVCの利用については、各ソフトウェアのライセンスに従ってください
+(1) 「本ソフトウェア」とは、本配布パッケージ、および作者が公開するソースコードの
+    リポジトリ（GitHub の ChordDotE/watashinosekaito_hatsunemiku）に含まれる
+    ソースコード、設定ファイル、ドキュメント、画像ファイルその他のすべての
+    ファイルをいいます。
 
-ライセンス改定
-本ライセンスは予告なく改定される場合があります。最新版は本READMEファイルをご確認ください。
+(2) 「個人利用」とは、自然人が私的な目的で本ソフトウェアを利用することをいい、
+    第(3)号の商用利用および第(4)号の業務利用のいずれにも該当しないものをいいます。
 
-本ソフトウェアを使用することで、上記の利用許諾契約に同意したものとみなされます。
+(3) 「商用利用」とは、自然人が、第(4)号の業務利用に該当しない形で、本ソフトウェアの
+    利用により、直接または間接に金銭その他の経済的利益を得ることをいいます。
+    収益化を伴う配信・投稿を含みますが、これに限りません。
+
+(4) 「業務利用」とは、事業者（法人、団体および個人事業主をいいます。営利を目的と
+    しない団体を含みます）が本ソフトウェアを利用すること、および何人であるかを
+    問わず事業のために本ソフトウェアを利用することをいいます。対価の授受の有無を
+    問いません。本ソフトウェアの設置サポート、本ソフトウェアを動かすサーバーの
+    提供その他本ソフトウェアに関する役務を他者に提供することを含みます。ただし、
+    自然人が自己の配信・投稿を収益化することは、第(3)号の商用利用として扱い、
+    本号には含めません。
+
+(5) 「翻案」とは、本ソフトウェアの内容をもとに、同等または類似の機能を有する
+    ソフトウェアを作成することをいいます。人手による再実装、自動変換、および
+    大規模言語モデルその他の機械学習を用いた生成を含みます。
+
+(6) 「作者」とは、本ソフトウェアを制作し、本契約に基づき利用を許諾する
+    ChordDotE をいいます。連絡先は第7条に定めるとおりです。
+
+(7) 「改変版」とは、本ソフトウェアの全部または一部に改変を加えたものをいいます。
+    改変した部分のみからなるもの、および差分を含みます。
+
+(8) 「改善の提案」とは、本ソフトウェアの改善を目的として、作者が採否を判断する
+    ために、改変の内容を作者に示すことをいいます。GitHub のプルリクエスト、
+    Issue への差分の添付等を含みます。
+
+
+第2条 権利の帰属
+
+  (1) 作者に帰属するもの
+      本ソフトウェア（本ソフトウェアに含まれるソースコード、プロンプト、
+      設定ファイル、ドキュメント、画像ファイルその他のファイル）に関する
+      著作権その他一切の知的財産権は、作者に帰属します（次号に掲げる第三者の
+      ものを除きます）。
+      ただし、本ソフトウェアのうち初音ミクのキャラクターを描写する部分は、
+      ピアプロ・キャラクター・ライセンスに基づく二次創作であり、
+      キャラクターそのものの権利は次号のとおり第三者に帰属します。
+
+  (2) 作者に帰属しないもの（第三者の権利）
+      次のものは本ソフトウェアに含まれておらず、作者はこれらについて何らの
+      権利も有しません。それぞれの権利者に帰属し、利用者が自ら取得し、
+      または設定して使用します（第3条・第13条）。
+
+        - 初音ミクのキャラクター
+          （クリプトン・フューチャー・メディア株式会社等）
+        - Live2D モデルおよび Cubism SDK（株式会社Live2D 等）
+        - Fish Audio その他の音声合成ソフトウェア・サービス・音声モデル
+        - 外部依存ライブラリ
+        - 本ソフトウェアが作曲機能においてインターネットから取得する
+          楽譜・音源その他の素材
+
+      ただし、外部依存ライブラリから取り込んだ一部のファイルは本ソフトウェアに
+      含まれます。当該ファイルは、ファイル内に記載した著作権者に帰属し、
+      ファイル内に記載したライセンスに従います。
+
+  (3) 本ソフトウェアを用いて生成されたもの
+      利用者が本ソフトウェアを用いて生成した会話、文章、楽曲、歌声その他の
+      生成物について、作者は権利を主張しません。ただし、原曲その他の第三者の
+      権利物に由来する部分には当該第三者の権利が及びます（第8条第(6)号）。
+
+  (4) 本契約は、本契約に定める範囲で本ソフトウェアの利用を許諾するもので
+      あって、いかなる権利も利用者へ譲渡するものではありません。本契約に
+      明示的に許諾されていない権利は、すべて作者に留保されます。本契約の制限は
+      利用者に対するものであり、作者自身による本ソフトウェアの利用、改変、
+      公開および配布を制限するものではありません。
+
+  (5) 第4条第(2)号により利用者が自己の環境で改変を行った場合、および第4条
+      第(6)号により改善の提案を行った場合も、本ソフトウェアに関する本条の
+      権利は変わりません。
+
+  (6) 作者は、改善の提案を採用するか否かを自由に判断します。改善の提案を
+      行った者は、作者に対し、提案の内容を本ソフトウェアに取り込み、改変し、
+      本契約その他作者の定める条件で公開および配布することを、無償で、
+      期間および地域の制限なく許諾し、作者に対して著作者人格権を行使しない
+      ものとします。採用された内容を含む本ソフトウェアには、本契約が適用されます。
+
+
+第3条 適用範囲
+
+  (1) 本契約は本ソフトウェアに適用されます。ただし、以下には適用されません。
+      それぞれの提供元が定める条件に従ってください。
+
+      - Google AI Studio（Gemini API）（Google の利用規約）
+      - Fish Audio のサービスおよび音声モデル（Fish Audio の利用規約）
+      - 音声合成に使用する各種音声モデル
+        （本ソフトウェアに音声モデルは含まれません。どのモデルを使用するかは
+        利用者の設定に委ねられており、各モデルの提供元の規約に従ってください）
+      - Tavily（Web 検索を使用する場合）、Cloudflare（外部アクセスを使用する場合）
+        その他本ソフトウェアが利用する第三者のサービス（各提供元の利用規約）
+      - VOCALOID6 および初音ミク V6（作曲機能を使用する場合。利用者が別途購入し、
+        各提供元の使用許諾に従います）
+      - Live2D モデルおよび Cubism SDK
+        （本ソフトウェアに含まれず、利用者が公式配布元から取得します）
+      - 初音ミクキャラクター（クリプトン・フューチャー・メディア株式会社等の権利）
+      - 外部依存ライブラリ（各ライブラリのライセンス。第2条第(2)号ただし書の
+        ファイルを含みます）
+
+  (2) 本ソフトウェアが利用する第三者のサービスおよびソフトウェア（Google AI Studio
+      〔Gemini API〕、Fish Audio、Tavily、Cloudflare、Gmail、VOCALOID6 等）の利用は、
+      利用者と各提供元との間の契約に基づくものです。利用者は、それぞれの利用条件
+      （年齢その他の利用資格を含みます）に従うものとします。作者は、これらの
+      サービスおよびソフトウェアについて、利用者の利用が各条件に適合すること、
+      提供の停止または変更、料金、ならびに当該サービスまたはソフトウェアの側で
+      生じた事象について、責任を負いません（作者の故意または重大な過失による
+      場合を除きます。第9条第(2)号）。
+
+
+第4条 許可される利用
+
+利用者は、無償で次の行為を行うことができます。ただし、第6条に定める行為に
+該当するものを除きます。
+
+  (1) 個人利用
+  (2) 利用者自身が自己の環境で使用するための改変
+  (3) 収益化を伴わない配信・投稿（YouTube、X 等の SNS への投稿を含む）
+  (4) 個人利用の範囲における、本ソフトウェアの内容の確認
+  (5) 閲覧および取得
+      GitHub 上での本ソフトウェアの閲覧、ならびに本ソフトウェアを取得し、
+      インストールするための複製（ダウンロード、git clone 等）。取得した写しは、
+      利用者自身の PC、または利用者本人のみがアクセスできる非公開の
+      リポジトリその他の保存場所に置き、第(2)号の改変を加えて使用することが
+      できます。
+  (6) 改善の提案のためのフォーク
+      GitHub のフォーク機能により本ソフトウェアの写しを作成し、改善の提案を
+      作成して作者へ送るために用いること。GitHub の利用規約により、公開
+      リポジトリのフォークは公開されますが、この目的に必要な範囲で改変の内容が
+      当該フォーク上で公開されることは、第6条第(8)号に該当しないものとします。
+      当該フォークを改善の提案以外の目的に用いることはできません（第6条第(9)号）。
+
+
+第5条 許可を要する利用
+
+次の行為には、作者の事前の許可（書面または記録の残る方法〔X のダイレクト
+メッセージ等〕によるもの）を要します。許可なく行うことを禁止します。
+
+  (1) 商用利用
+  (2) 翻案、および翻案により作成されたものの配布
+  (3) 本ソフトウェア（改変版を除きます）の再配布、二次配布（商用・非商用を
+      問わない）
+  (4) 逆コンパイル、逆アセンブル、リバースエンジニアリング
+  (5) ソースコード、プロンプト、設定その他の内容を機械的に読み取り、
+      抽出し、または複製する行為
+  (6) 本ソフトウェアの内容を、機械学習モデルの学習または訓練の用途に
+      利用する行為
+
+第(2)号および第(4)号ないし第(6)号は、第4条第(2)号、第(4)号および第(6)号で
+認めた範囲（利用者自身が自己の環境で使用するための確認および改変、ならびに
+改善の提案の作成）を妨げるものではありません。また、第4条第(5)号および第(6)号で
+認めた閲覧、取得、自己用の写しの保持および改善の提案のためのフォークは、
+第(3)号および第(5)号に該当しないものとします。
+業務利用、および改変版の公開・配布は、本条の許可の対象ではなく、第6条により
+禁止されます。
+
+
+第6条 禁止される行為
+
+次の行為は、いかなる場合も行うことができません。これらについて第7条の許可は
+行いません。
+
+  (1) 法令に違反する行為、または犯罪行為に関連する行為
+  (2) 他人を誹謗中傷し、脅迫し、差別し、その他他人の権利または利益を
+      侵害する行為
+  (3) 実在の人物または団体になりすます行為、および本ソフトウェアの応答を
+      実在の人物または団体の発言であるかのように示す行為
+  (4) 第三者の音声、肖像その他その人を示す情報を、当該第三者の同意なく
+      複製し、模倣し、または合成する行為
+  (5) 初音ミクその他のキャラクターの価値または信用を毀損する利用、および
+      公序良俗に反する利用（ピアプロ・キャラクター・ライセンスおよび
+      クリプトン・フューチャー・メディア株式会社のガイドラインに反する
+      利用を含みます）
+  (6) 本ソフトウェアを用いて、他のシステムまたは第三者のサービスに対し、
+      不正アクセス、過度の負荷その他の妨害を行う行為
+  (7) 業務利用
+  (8) 改変版を公開し、配布し、または再配布する行為（有償・無償を問わず、
+      改変版を第三者が取得し、または利用できる状態に置くことを含みます）。
+      ただし、改善の提案として改変の内容を作者に示すこと（第4条第(6)号）を
+      除きます。
+  (9) 第4条第(6)号のフォークを、改善の提案以外の目的に用いる行為（当該フォークを
+      改変版の配布、宣伝または公開の場とすること、当該フォークの改変版を第三者に
+      使用させることを含みます）
+
+作者が改善の提案を採用し、その内容を含む本ソフトウェアを作者が公開または配布する
+ことは、本条の制限を受けません（第2条第(4)号・第(6)号）。
+
+
+第7条 許可の申請
+
+商用利用その他第5条に定める行為をご希望の場合は、次の連絡先へご相談ください。
+許可は、記録の残る形で個別に行います。第6条に定める行為（業務利用および改変版の
+公開・配布を含みます）は、許可の対象ではありません。
+作者の許可は作者の権利の範囲に限られ、初音ミクのキャラクター、Live2D、
+音声モデルその他第三者の権利の許諾を含みません。これらについては、それぞれの
+権利者の条件に従ってください（第3条・第13条）。
+
+  X (Twitter): https://x.com/ChordDotE
+
+
+第8条 利用者の責任
+
+利用者は、自己の責任と費用負担において本ソフトウェアを利用するものとし、
+次の事項について責任を負います。
+
+  (1) 費用の負担
+      本ソフトウェアは、Google AI Studio（Gemini）、Fish Audio、Tavily
+      その他の第三者サービスを利用します。これらの利用料金は、利用者と
+      各サービス提供者との契約に基づき、利用者が負担します（第3条第(2)号）。利用量は会話、
+      ミクの自発的な動作、作曲等により変動し、利用者の想定を超える料金が
+      発生する場合があります。
+  (2) 認証情報の管理
+      API キー、アプリパスワード、ログインパスワードその他の認証情報の
+      設定、保管および更新。これらの認証情報、ならびに会話、記憶、登録した
+      顔写真および声の録音その他本ソフトウェアが扱うデータは、暗号化されずに
+      利用者の環境へ保存されます。
+  (3) アクセス制御
+      同一ネットワーク上の他の端末から、または外部公開（トンネル）により
+      他者がアクセスしうる状態に本ソフトウェアを置く場合の、ログイン
+      パスワードの設定その他のアクセス制御。設定を行わない場合、
+      アクセスできる者は、会話、記憶、登録した顔や声、設定その他本ソフトウェアが
+      扱う情報に触れうる状態になります。また、本ソフトウェアを動かしている
+      PC からは、ログインパスワードの設定の有無にかかわらずパスワードなしで
+      利用できるため、当該 PC の管理も利用者が行うものとします。
+  (4) 第三者の情報
+      マイク、カメラその他の入力により第三者の音声、映像または個人情報を
+      取得する場合の、当該第三者への説明および同意の取得。これらの入力は
+      第三者サービスへ送信される場合があります。
+  (5) 外部から取得する素材
+      利用者が作曲機能でカバー（既存曲の再現）を依頼すると、本ソフトウェアは、
+      曲名をもとにインターネットを自動で検索し（利用者が URL を示した場合は
+      それを優先します）、見つかったページから楽譜（MIDI）を、見つからない場合は
+      音源（MP3 等）を、また歌詞を掲載したページの文章を自動的に取得します。
+      取得した素材は利用者の環境（曲ごとのフォルダ）に保存され、お手本の採譜
+      および歌詞の参照に使われます。取得の際、本ソフトウェアは一般的な
+      ウェブブラウザと同じ形式の要求を送ります。
+      作者は、取得元およびそこで公開されている素材の適法性や権利関係を
+      確認しておらず、これらを保証しません。利用者は、取得した素材を私的な
+      利用の範囲で用いるものとし、取得元の利用規約および権利者の条件を
+      確認してください。取得元の条件に反するおそれがある場合は、当該素材を
+      用いないでください。当該素材またはこれをもとにした生成物を公開する
+      場合は、第(6)号のとおりとします。
+  (6) 生成物
+      本ソフトウェアにより生成された会話、文章、楽曲、歌声、音声その他の
+      生成物の利用、保存および公開。第三者の権利に関わる生成物を公開する
+      場合は、利用者が必要な権利処理を行うものとします。
+  (7) 法令の遵守
+      利用者の所在地および利用地において適用される法令の遵守。
+  (8) データの保全
+      会話、記憶、設定その他のデータのバックアップ。
+
+
+第9条 免責および保証の否認
+
+  (1) 本ソフトウェアは「現状のまま」提供され、明示または黙示を問わず、
+      いかなる保証も行いません。商品性、特定目的への適合性、正確性、
+      継続的な動作、およびセキュリティ上の欠陥がないことを含みます。
+  (2) 作者は、作者の故意または重大な過失による場合を除き、本ソフトウェアの
+      使用または使用不能により生じたいかなる損害についても責任を負いません。
+      第三者サービスの利用料金、データの消失または破損、および第三者との
+      紛争を含みます。
+  (3) 本ソフトウェアは大規模言語モデルを利用しており、その応答および
+      生成物は、不正確、不完全または不適切な内容を含むことがあります。
+      医療、法律、金融その他の専門的な判断の根拠として用いないでください。
+  (4) 本ソフトウェアはベータ版であり、予期しない動作、エラーまたは
+      データの消失が生じる場合があります。
+  (5) 法令により作者の責任を完全には排除できない場合であっても、
+      作者の責任は、法令上許容される最小限の範囲にとどまるものとします。
+
+
+第10条 提供の継続
+
+  (1) 作者は、本ソフトウェアの提供、更新、不具合の修正、および問い合わせへの
+      対応を行う義務を負いません。
+  (2) 作者は、本ソフトウェアの提供または公開を、予告なく変更し、中断し、
+      または終了することができます。
+  (3) 本ソフトウェアは第三者サービスに依存しています。これらの仕様変更、
+      料金改定または提供終了により、本ソフトウェアの全部または一部が
+      利用できなくなる場合があります。
+
+
+第11条 補償
+
+利用者が本契約に違反したこと、または利用者による本ソフトウェアの利用に起因して、
+第三者から作者に対し請求、訴訟その他の申立てがなされた場合、利用者は自己の
+責任と費用負担によりこれを解決し、作者に生じた損害（合理的な弁護士費用を
+含みます）を補償するものとします。
+
+
+第12条 契約の終了
+
+  (1) 利用者が本契約に違反した場合、本契約に基づく許可は、通知を要せず
+      当然に終了します。
+  (2) 終了した場合、利用者は速やかに本ソフトウェアの使用を停止し、
+      これを（改変版およびフォークを含めて）削除するものとします。
+  (3) 第2条（権利の帰属）、第9条（免責および保証の否認）、第11条（補償）、
+      第14条（可分性）および第15条（準拠法および管轄）は、終了後も有効に
+      存続します。
+
+
+第13条 第三者の権利
+
+  (1) 本ソフトウェアは、クリプトン・フューチャー・メディア株式会社等の
+      公式のものではありません。
+  (2) 本ソフトウェアは、ピアプロ・キャラクター・ライセンス（PCL）に基づく
+      非営利のファン創作です。この作品はピアプロ・キャラクター・ライセンスに
+      基づいてクリプトン・フューチャー・メディア株式会社のキャラクター
+      「初音ミク」を描いたものです。
+      https://piapro.jp/license/pcl/summary
+  (3) 初音ミクキャラクターの利用については、クリプトン・フューチャー・メディア
+      株式会社のガイドラインに従ってください。
+  (4) Fish Audio 等、利用する音声合成ソフトウェア・サービス・
+      音声モデルについては、それぞれのライセンス・利用規約に従ってください
+      （第3条）。
+
+
+第14条 可分性
+
+本契約のいずれかの条項またはその一部が法令により無効または執行不能と判断された
+場合であっても、当該条項の残りの部分および他の条項は、引き続き有効に存続します。
+無効または執行不能とされた部分は、その趣旨に最も近い有効な内容に読み替えられる
+ものとします。
+
+
+第15条 準拠法および管轄
+
+本契約は日本法に準拠します。本契約に関して紛争が生じた場合は、東京地方裁判所を
+第一審の専属的合意管轄裁判所とします。
+
+
+第16条 改定
+
+本契約は改定される場合があります。改定後の版は、本ファイルの冒頭に記載する
+版番号および発効日により識別されます。利用者がどの版に同意したものとされるかは
+第0条第(1)号に定めるとおりです。利用者が新しい版を導入するまでは、改定前に同意した
+版が引き続き適用されます。
+
+
+================================================================================
+English (reference translation)
+================================================================================
+
+IMPORTANT: Read this Agreement before installing or using the Software.
+
+
+Article 0. Acceptance
+
+(1) You agree to all terms of the version of this Agreement specified below
+    (identified by the version number and effective date at the top of this
+    file), at the time specified below. If you do not agree, do not install,
+    obtain, or use the Software.
+      (i)   If you use the installer: the version displayed during installation,
+            when you indicate acceptance.
+      (ii)  If you do not use the installer (for example, when you use the
+            source code from the public repository, or fork it in order to make
+            an Improvement Proposal): the version included with the Software
+            when you obtain it (including by downloading, git clone, or forking)
+            or first use it.
+      (iii) If you install a newer release of the Software (by installing over
+            an existing installation, updating, or the like): the version
+            displayed or included at that time, when you install it.
+
+(2) If you are a minor, install and use the Software only with the consent of a
+    parent or legal guardian. Use of the Software may incur usage-based charges
+    from third-party services (Article 8 (1)). Where a third-party service used
+    by the Software (such as Google AI Studio (Gemini API) or Fish Audio) has
+    age or other eligibility requirements, you must comply with them (Article 3
+    (2)).
+
+
+Article 1. Definitions
+
+(1) "Software" means all files contained in this distribution package and in the
+    source code repository published by the Author
+    (ChordDotE/watashinosekaito_hatsunemiku on GitHub), including source code,
+    configuration files, documentation, and image files.
+
+(2) "Personal Use" means use by a natural person for private purposes, which is
+    neither Commercial Use (3) nor Business Use (4).
+
+(3) "Commercial Use" means use of the Software by a natural person, in a manner
+    that is not Business Use (4), to obtain, directly or indirectly, money or
+    any other economic benefit. This includes, without limitation, monetized
+    streaming or posting.
+
+(4) "Business Use" means any use of the Software by a business (a corporation,
+    organization, or sole proprietor, including non-profit organizations), and
+    any use of the Software for the purposes of a business by anyone, WHETHER OR
+    NOT ANY PAYMENT IS INVOLVED. This includes providing services relating to
+    the Software to others, such as installation support or hosting servers
+    that run the Software. However, a natural person monetizing his or her own
+    streams or posts is treated as Commercial Use (3), not as Business Use.
+
+(5) "Adaptation" means creating software having equivalent or similar
+    functionality based on the contents of the Software. This includes manual
+    reimplementation, automated translation, and generation using large language
+    models or other machine learning.
+
+(6) "Author" means ChordDotE, who created the Software and licenses it under
+    this Agreement. Contact details are set out in Article 7.
+
+(7) "Modified Version" means the Software, in whole or in part, with
+    modifications. This includes material consisting only of the modified
+    portions, and diffs.
+
+(8) "Improvement Proposal" means showing modifications to the Author, for the
+    purpose of improving the Software, so that the Author can decide whether to
+    adopt them. This includes GitHub pull requests and diffs attached to issues.
+
+
+Article 2. Ownership of Rights
+
+(1) What belongs to the Author.
+    All copyright and other intellectual property rights in the Software (the
+    source code, prompts, configuration files, documentation, image files, and
+    other files in the Software) belong to the Author, except for
+    the third-party items listed in (2). However,
+    the portions of the Software that depict the character Hatsune Miku are a
+    derivative work under the Piapro Character License; the character itself
+    belongs to a third party as stated in (2).
+
+(2) What does NOT belong to the Author (third-party rights).
+    The following are not included in the Software, and the Author holds no
+    rights in them. They belong to their respective rights holders, and are
+    obtained or configured by you (see Articles 3 and 13):
+
+      - the character Hatsune Miku (Crypton Future Media, Inc. and others);
+      - Live2D models and the Cubism SDK (Live2D Inc. and others);
+      - Fish Audio and other voice synthesis software,
+        services, and voice models;
+      - third-party dependency libraries; and
+      - scores, audio, and other material that the Software downloads from the
+        internet in its music features.
+
+    However, a few files taken from third-party dependency libraries are
+    included in the Software. Each such file belongs to the copyright holder
+    stated in it and is governed by the license stated in it.
+
+(3) What is generated with the Software.
+    The Author claims no rights in the conversations, text, music, singing, or
+    other output you generate with the Software. However, portions derived from
+    an original work or other third-party material remain subject to that third
+    party's rights (Article 8 (6)).
+
+(4) This Agreement licenses use of the Software within the scope set out in it;
+    it does not transfer any right to you. All rights not expressly granted here
+    are reserved by the Author. The restrictions in this Agreement apply to
+    users; they do not restrict the Author's own use, modification,
+    publication, or distribution of the Software.
+
+(5) Modification for your own environment under Article 4 (2), and making an
+    Improvement Proposal under Article 4 (6), do not change the rights described
+    in this Article.
+
+(6) The Author decides freely whether to adopt an Improvement Proposal. A person
+    who makes an Improvement Proposal grants the Author, free of charge and
+    without limitation in time or territory, the right to incorporate its
+    contents into the Software, modify them, and publish and distribute them
+    under this Agreement or other terms set by the Author, and shall not
+    exercise moral rights against the Author. The Software including adopted
+    contents is governed by this Agreement.
+
+
+Article 3. Scope
+
+(1) This Agreement applies to the Software. It does NOT apply to the following,
+    which are governed by the terms of their respective providers:
+      - Google AI Studio (Gemini API) (Google's terms);
+      - Fish Audio services and voice models;
+      - voice synthesis models generally (no voice model is included in the
+        Software; the choice of model is left to the user and is governed by
+        that model's provider);
+      - Tavily (when web search is used), Cloudflare (when external access is
+        used), and other third-party services used by the Software (each
+        provider's terms);
+      - VOCALOID6 and Hatsune Miku V6 (when the music features are used;
+        purchased separately by the user and governed by their providers'
+        licenses);
+      - Live2D models and the Cubism SDK (not included in the Software;
+        obtained by the user from the official distributor);
+      - the Hatsune Miku character (rights of Crypton Future Media, Inc. and
+        others); and
+      - third-party dependency libraries (each under its own license, including
+        the files described in the proviso to Article 2 (2)).
+
+(2) Your use of third-party services and software used by the Software (such as
+    Google AI Studio (Gemini API), Fish Audio, Tavily, Cloudflare, Gmail, and
+    VOCALOID6) is based on your own agreement with each provider. You must
+    comply with their respective terms (including age and other eligibility
+    requirements). The Author is not responsible for whether your use complies
+    with those terms, for the suspension or change of those services or
+    software, for their fees, or for anything that occurs on the side of those
+    services or software (except in cases of the Author's willful misconduct or
+    gross negligence; Article 9 (2)).
+
+
+Article 4. Permitted Use
+
+You may, free of charge, do the following, except for anything that falls
+under Article 6:
+  (1) engage in Personal Use;
+  (2) modify the Software for your own use in your own environment;
+  (3) stream or post without monetization (including YouTube, X, and other social
+      media);
+  (4) inspect the contents of the Software within the scope of Personal Use;
+  (5) Viewing and obtaining. View the Software on GitHub, and copy the Software
+      in order to obtain and install it (downloading, git clone, and the like).
+      You may keep the copy you obtain on your own PC, or in a private
+      repository or other storage location that only you can access, and use
+      it with modifications under item (2); and
+  (6) Forking to make Improvement Proposals. Create a copy of the Software
+      using GitHub's fork feature and use it to prepare Improvement Proposals
+      and send them to the Author. Under GitHub's terms, forks of a public
+      repository are public; modifications becoming public on that fork to the
+      extent necessary for this purpose do not fall under Article 6 (8). You
+      may not use such a fork for any purpose other than Improvement Proposals
+      (Article 6 (9)).
+
+
+Article 5. Use Requiring Permission
+
+The following require the Author's PRIOR PERMISSION, given in writing or by
+another recorded method (such as a direct message on X), and are PROHIBITED
+without it:
+
+  (1) Commercial Use;
+  (2) Adaptation, and distribution of anything created by Adaptation;
+  (3) redistribution and secondary distribution of the Software (other than
+      Modified Versions), whether commercial or non-commercial;
+  (4) decompilation, disassembly, and reverse engineering;
+  (5) mechanically reading, extracting, or reproducing the source code, prompts,
+      configuration, or other contents; and
+  (6) using the contents of the Software for training machine learning models.
+
+Items (2) and (4) through (6) do not restrict the inspection and modification
+permitted under Article 4 (2), (4), and (6) (by the user, for the user's own
+environment, and in preparing Improvement Proposals). In addition, the viewing,
+obtaining, keeping of your own copy, and forking for Improvement Proposals
+permitted under Article 4 (5) and (6) do not fall under items (3) and (5).
+Business Use and publishing or distributing Modified Versions are not subject
+to permission under this Article; they are prohibited by Article 6.
+
+
+Article 6. Prohibited Conduct
+
+The following are PROHIBITED in all cases. No permission under Article 7 will be
+granted for them:
+
+  (1) any act that violates applicable law or relates to criminal activity;
+  (2) defaming, threatening, or discriminating against others, or otherwise
+      infringing the rights or interests of others;
+  (3) impersonating a real person or organization, or presenting the Software's
+      output as a statement of a real person or organization;
+  (4) reproducing, imitating, or synthesizing a third party's voice, likeness,
+      or other identifying attributes without that party's consent;
+  (5) any use that damages the value or reputation of the character Hatsune Miku
+      or any other character, and any use contrary to public order and morals
+      (including use contrary to the Piapro Character License and the guidelines
+      of Crypton Future Media, Inc.); and
+  (6) using the Software to gain unauthorized access to, place excessive load
+      on, or otherwise interfere with any other system or third-party service;
+  (7) Business Use;
+  (8) publishing, distributing, or redistributing a Modified Version (whether
+      for a fee or free of charge, including making a Modified Version
+      available for third parties to obtain or use), except for showing
+      modifications to the Author as an Improvement Proposal (Article 4 (6));
+      and
+  (9) using a fork under Article 4 (6) for any purpose other than Improvement
+      Proposals (including using the fork as a place to distribute, promote,
+      or publish a Modified Version, or having third parties use the Modified
+      Version on the fork).
+
+The Author's adoption of an Improvement Proposal, and the Author's publication
+or distribution of the Software including it, are not restricted by this
+Article (Article 2 (4) and (6)).
+
+
+Article 7. Requesting Permission
+
+For Commercial Use or any other act under Article 5, please contact the Author.
+Permission is granted individually, in recorded form. Acts under Article 6
+(including Business Use and publishing or distributing Modified Versions) are
+not subject to permission.
+The Author's permission extends only to the Author's own rights; it does not
+include any license of the rights of third parties, such as the character
+Hatsune Miku, Live2D, or voice models. For those, follow the terms of the
+respective rights holders (Articles 3 and 13).
+
+  X (Twitter): https://x.com/ChordDotE
+
+
+Article 8. User Responsibilities
+
+You use the Software at your own risk and expense, and you are responsible for:
+
+  (1) Costs. The Software uses third-party services including Google AI Studio
+      (Gemini), Fish Audio, and Tavily. Their fees are payable by you under your
+      contract with each provider (Article 3 (2)). Usage varies with conversation, Miku's
+      autonomous activity, and music creation, and may exceed your expectations.
+  (2) Credentials. Setting, storing, and updating API keys, app passwords, login
+      passwords, and other credentials. These credentials, as well as
+      conversations, memories, registered face photos and voice recordings, and
+      other data handled by the Software, are stored unencrypted in your
+      environment.
+  (3) Access control. Where the Software is made reachable by others - from
+      other devices on the same network, or via external publication (tunnel) -
+      setting a login password and otherwise controlling access. Without it,
+      anyone who can reach it may be able to access conversations, memories,
+      registered faces and voices, settings, and other information handled by
+      the Software. In addition, the Software can be used without a password
+      from the PC on which it runs, whether or not a login password is set, so
+      you are also responsible for managing that PC.
+  (4) Third parties. Where microphone, camera, or other input captures a third
+      party's voice, image, or personal data: informing that party and obtaining
+      consent. Such input may be transmitted to third-party services.
+  (5) Externally obtained material. When you ask for a cover (a reproduction
+      of an existing song) in the music features, the Software automatically
+      searches the internet based on the song title (giving priority to any
+      URL you provide), and automatically downloads a score (MIDI) from the
+      pages it finds or, if none is found, audio (such as MP3), as well as the
+      text of pages that publish the lyrics. The downloaded material is saved
+      in your environment (in the folder for each song) and used for
+      transcribing the reference melody and referring to the lyrics. When
+      downloading, the Software sends requests in the same form as an ordinary
+      web browser.
+      The Author has not verified, and does not warrant, the lawfulness of the
+      sources or the rights in the material they publish. You shall use
+      downloaded material only within the scope of private use, and should
+      check the terms of the source and the conditions of the rights holders.
+      If use of the material may violate the source's conditions, do not use
+      it. Publication of such material or of output based on it is governed by
+      item (6).
+  (6) Output. Your use, storage, and publication of conversations, text, music,
+      singing, audio, and other output generated by the Software. Where output
+      involves third-party rights, you must obtain the necessary clearances.
+  (7) Compliance with the laws applicable where you are located and where you
+      use the Software.
+  (8) Backing up conversations, memories, settings, and other data.
+
+
+Article 9. Disclaimer and No Warranty
+
+  (1) The Software is provided "AS IS", without warranty of any kind, express or
+      implied, including merchantability, fitness for a particular purpose,
+      accuracy, continued operation, and freedom from security defects.
+  (2) Except in cases of the Author's willful misconduct or gross negligence,
+      the Author is not liable for any damages arising from use of or inability
+      to use the Software, including third-party service fees, loss of or damage
+      to data, and disputes with third parties.
+  (3) The Software uses large language models. Its responses and output may be
+      inaccurate, incomplete, or inappropriate. Do not rely on them as a basis
+      for medical, legal, financial, or other professional decisions.
+  (4) The Software is a beta version; unexpected behavior, errors, and data loss
+      may occur.
+  (5) Where liability cannot be excluded entirely under applicable law, the
+      Author's liability is limited to the minimum extent permitted by law.
+
+
+Article 10. Availability
+
+  (1) The Author has no obligation to provide, update, or fix the Software, or
+      to respond to inquiries.
+  (2) The Author may change, suspend, or discontinue the Software or its
+      publication at any time without notice.
+  (3) The Software depends on third-party services. Changes to their
+      specifications, pricing, or availability may render the Software wholly or
+      partly unusable.
+
+
+Article 11. Indemnification
+
+If a third party brings any claim, suit, or other proceeding against the Author
+arising from your breach of this Agreement or from your use of the Software, you
+shall resolve it at your own risk and expense and indemnify the Author for the
+resulting damages, including reasonable attorneys' fees.
+
+
+Article 12. Termination
+
+  (1) If you breach this Agreement, the permissions granted under it terminate
+      automatically, without notice.
+  (2) Upon termination, you shall promptly cease using the Software and delete
+      it (including any Modified Versions and forks).
+  (3) Article 2 (Ownership of Rights), Article 9 (Disclaimer and No Warranty),
+      Article 11 (Indemnification), Article 14 (Severability), and Article 15
+      (Governing Law and Jurisdiction) survive termination.
+
+
+Article 13. Third-Party Rights
+
+The Software is not an official work of Crypton Future Media, Inc. or any
+other rights holder. It is a non-commercial fan work under the Piapro Character
+License (PCL). This work depicts the character "Hatsune Miku" of Crypton Future
+Media, Inc. under the Piapro Character License
+(https://piapro.jp/license/pcl/summary). Follow Crypton Future Media's guidelines
+regarding use of the character, and the respective licenses and terms of
+Fish Audio and any voice synthesis software, services, or models used
+(Article 3).
+
+
+Article 14. Severability
+
+If any provision of this Agreement, or part of one, is held invalid or
+unenforceable under applicable law, the remainder of that provision and the
+other provisions remain in effect. The invalid or unenforceable part shall be
+read as the valid content closest to its original intent.
+
+
+Article 15. Governing Law and Jurisdiction
+
+This Agreement is governed by the laws of Japan. The Tokyo District Court shall
+have exclusive jurisdiction as the court of first instance for any dispute
+arising out of this Agreement.
+
+
+Article 16. Amendment
+
+This Agreement may be amended. Amended versions are identified by the version
+number and effective date at the top of this file. The version you are treated
+as having agreed to is determined under Article 0 (1). Until you install a newer
+release, the version you previously agreed to continues to apply.
+
+
+--------------------------------------------------------------------------------
+In case of any discrepancy between the Japanese text and this English
+translation, the Japanese text prevails.
+日本語版と英語版に相違がある場合は、日本語版を正とします。
+--------------------------------------------------------------------------------

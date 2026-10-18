@@ -1,0 +1,1 @@
+{"version":3,"file":"lappdelegate.js","sourceRoot":"","sources":["../src/lappdelegate.ts"],"names":[],"mappings":"AAAA;;;;;GAKG;AAEH,MAAM,OAAO,YAAY;IAId,MAAM,CAAC,WAAW;QACrB,IAAI,CAAC,IAAI,CAAC,SAAS,EAAE,CAAC;YAClB,IAAI,CAAC,SAAS,GAAG,IAAI,YAAY,EAAE,CAAC;QACxC,CAAC;QACD,OAAO,IAAI,CAAC,SAAS,CAAC;IAC1B,CAAC;CACJ"}

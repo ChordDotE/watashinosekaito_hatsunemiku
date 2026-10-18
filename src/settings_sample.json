@@ -1,28 +1,133 @@
 {
-  "api": {
-    "default_provider": "openrouter",
-    "openrouter": {
-      "url": "https://openrouter.ai/api/v1/chat/completions",
-      "api_key": "put your OpenRouter API key",
-      "models": {
-        "conversation": "google/gemini-2.5-flash",
-        "analysis": "openai/gpt-5-mini"
-      }
+  "api_keys": {
+    "google": "put your Google AI Studio API key",
+    "fish_audio": "put your Fish Audio API key",
+    "tavily": "put your Tavily API key",
+    "gmail_app_password": "put your Gmail app password"
+  },
+  "llm": {
+    "flash_model": "google-gla:gemini-3.8-flash",
+    "pro_model": "google-gla:gemini-3.1-pro-preview",
+    "lite_model": "google-gla:gemini-3.1-flash-lite",
+    "filler_enabled": true,
+    "embedding_model": "models/gemini-embedding-2"
+  },
+  "tts": {
+    "fish_audio": {
+      "voice_id": "e1920bf9c3034eddb2cd9965da681a11",
+      "sample_rate": 44100,
+      "latency": "balanced",
+      "backend": "drama-3",
+      "tone_control": true
+    }
+  },
+  "stt": {
+    "provider": "fish_audio",
+    "auto_send": {
+      "enabled": true,
+      "delay_seconds": 5
     },
-    "gemini": {
-      "api_key": "",
-      "models": {
-        "conversation": "old",
-        "analysis": "old"
+    "smart_turn": {
+      "enabled": true,
+      "threshold": 0.5
+    },
+    "fish_audio": {
+      "language": "ja",
+      "speech_threshold": 0.03,
+      "silence_chunks": 5,
+      "ignore_timestamps": false,
+      "interim_interval_sec": 2.0
+    }
+  },
+  "camera": {
+    "enabled": true,
+    "buffer_size": 3
+  },
+  "conversation_reaction": {
+    "enabled": true,
+    "cooldown_seconds": 5,
+    "text_input_enabled": true
+  },
+  "email": {
+    "enabled": false,
+    "smtp_host": "smtp.gmail.com",
+    "smtp_port": 587,
+    "smtp_user": "put your sender gmail address",
+    "recipient": "put your recipient email address"
+  },
+  "web_search": {
+    "enabled": false
+  },
+  "song_service": {
+    "enabled": false,
+    "max_runtime_minutes": 60,
+    "pro_model": "google-gla:gemini-3.1-pro-preview",
+    "flash_model": "google-gla:gemini-3.8-flash",
+    "lite_model": "google-gla:gemini-3.1-flash-lite"
+  },
+  "memory": {
+    "knowledge_base": {
+      "chunk_size_child": 1024,
+      "top_k": 10
+    },
+    "compress_threshold": 20000,
+    "recent_conversation": {
+      "limit": 7,
+      "full_text_count": 1
+    }
+  },
+  "logs": {
+    "archive_enabled": true,
+    "keep_days": 30
+  },
+  "interest": {
+    "exposure": {
+      "enabled": true,
+      "categories": {
+        "technology": true,
+        "learning": true,
+        "life": true,
+        "fun": true,
+        "anime_game": true,
+        "entertainment": true,
+        "news": true
       }
     }
   },
-  "audio": {
-    "output_device_backup": "old",
-    "output_device": "old",
-    "webrtc": {
-      "input_device": "old",
-      "input_channels": 2
+  "system": {
+    "tunnel_enabled": false,
+    "keep_tunnel_on_stop": true,
+    "skip_memory": false
+  },
+  "security": {
+    "auth": {
+      "password_hash": "",
+      "session_hours": 24,
+      "lock_threshold": 10,
+      "lock_minutes": 5
+    }
+  },
+  "services": {
+    "gateway": {
+      "port": 5001,
+      "host": "0.0.0.0"
+    },
+    "kv": {
+      "enabled": true,
+      "port": 8010
+    },
+    "vdb": {
+      "enabled": true,
+      "port": 8020
+    },
+    "stt": {
+      "port": 5006
+    },
+    "agent": {
+      "port": 5010
+    },
+    "recognition": {
+      "port": 5007
     }
   }
 }

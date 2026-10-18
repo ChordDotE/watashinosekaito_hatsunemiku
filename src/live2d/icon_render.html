@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<!--
+  Watashinosekaito Hatsune Miku
+  Copyright (c) 2025-2026 ChordDotE. All rights reserved.
+  SPDX-License-Identifier: LicenseRef-ChordDotE-NonCommercial-2.0
+
+  NON-COMMERCIAL USE ONLY. NO BUSINESS USE. NO ADAPTATION.
+
+  Business use (any use by or for a company, organization, or sole
+  proprietor, WHETHER OR NOT ANY PAYMENT IS INVOLVED) and publishing or
+  distributing modified versions are PROHIBITED IN ALL CASES; no permission
+  is granted for them. Forks may be used only to propose improvements to the
+  Author (e.g. pull requests). Commercial use, redistribution, and Adaptation
+  are PROHIBITED without prior written permission. "Adaptation" includes
+  manual reimplementation, automated translation, and generation using large
+  language models or other machine learning, of software having equivalent or
+  similar functionality. Permission is granted individually, in recorded form.
+  Contact: https://x.com/ChordDotE
+
+  業務利用（対価の有無を問わず、法人・団体・個人事業主による利用と事業のための利用）と、
+  改変版の公開・配布は、許可の余地なく禁止します。フォークは作者への改善の提案
+  （プルリクエスト等）のためだけに使えます。商用利用・再配布・翻案は、作者の許可が
+  ない限り禁止します。翻案には、再実装・自動変換・大規模言語モデル等を用いた生成に
+  よる、同等または類似の機能を持つソフトウェアの作成を含みます。
+  許可が必要な場合は、記録の残る形でご連絡ください。
+
+  See LICENSE for full terms. 詳細は LICENSE を参照してください。
+-->
+
+<html>
+<head>
+<meta charset="utf-8">
+<title>Miku Icon Renderer</title>
+<style>html, body { margin: 0; background: #e8e8e8; }</style>
+<!-- Cubism Core（利用者が自分でダウンロードした SDK 内のもの。リポジトリには含まれない） -->
+<script src="CubismWebSamples/Core/live2dcubismcore.min.js"></script>
+<!-- 描画ライブラリ（MIT・vendor に同梱）。バージョンはモーションラボと同一にすること。
+     変えると描画結果が変わり、確認済みのアイコンと同じ絵にならなくなる -->
+<script src="vendor/pixi.min.js"></script>
+<script src="vendor/cubism4.min.js"></script>
+</head>
+<body>
+<script>
+'use strict';
+
+/* アイコン用の静止画を描くためだけのページ。セットアップ（generate_icon.py）が
+   ヘッドレスブラウザで開き、window.READY になったところをスクリーンショットする。
+
+   **描画条件はモーションラボ（render.html）と一致させてある**:
+     - 論理キャンバス 700x1000 ／ 実ピクセルは resolution 倍
+     - モデルは中央寄せ・0.95 倍でフィット
+     - まばたき・呼吸・物理を無効化（毎回まったく同じ絵になるようにする）
+   環境差（GPU/ドライバ）で色が微妙に変わることはあっても、構図はここの数値で決まる。 */
+
+const QS = new URLSearchParams(location.search);
+const SCALE = Math.min(4, Math.max(1, parseFloat(QS.get('scale')) || 3));
+const MODEL_URL = QS.get('model')
+  || 'CubismWebSamples/Samples/Resources/miku_sample_t04/miku_sample_t04.model3.json';
+const POSE_URL = QS.get('pose') || 'icon_pose.json';
+
+window.READY = false;
+window.LAST_ERROR = null;
+
+async function init() {
+  try {
+    const pose = await (await fetch(POSE_URL)).json();
+
+    // autoStart: false ＝ 自動描画ループ（requestAnimationFrame）を使わない。
+    // 非表示ウィンドウでは rAF が止まるため、ループに頼ると描画が進まない
+    // （WebView2 の hidden ウィンドウで実際にタイムアウトした・2026-08-02）。
+    // 代わりに snapshot() の中で必要な回数だけ手で更新・描画する
+    const app = new PIXI.Application({
+      width: 700, height: 1000,
+      resolution: SCALE,
+      autoDensity: false,
+      backgroundColor: 0xe8e8e8,
+      preserveDrawingBuffer: true,
+      antialias: true,
+      autoStart: false,
+    });
+    document.body.appendChild(app.view);
+
+    const model = await PIXI.live2d.Live2DModel.from(MODEL_URL, {
+      autoInteract: false,
+      motionPreload: PIXI.live2d.MotionPreloadStrategy.NONE,
+      idleMotionGroup: '__none__',
+    });
+
+    // 自動で動く要素をすべて止める（アイコンは毎回同じ絵である必要がある）
+    model.internalModel.eyeBlink = undefined;
+    model.internalModel.breath = undefined;
+    model.internalModel.physics = undefined;
+
+    // motionManager.update は loadParameters と saveParameters の間で呼ばれるため、
+    // ここで書いた値が毎フレーム維持される（物理を切ってあるので髪の値も保持される）
+    const raw = model.internalModel.coreModel.getModel();
+    model.internalModel.motionManager.update = () => {
+      for (const [id, v] of Object.entries(pose)) {
+        const i = raw.parameters.ids.indexOf(id);
+        if (i >= 0) raw.parameters.values[i] = v;
+      }
+      return true;
+    };
+
+    // 配置は app.screen（常に 700x1000 の論理座標）で行う。app.view は resolution 倍のため使わない
+    const fit = Math.min(app.screen.width / model.width, app.screen.height / model.height) * 0.95;
+    model.scale.set(fit);
+    model.anchor.set(0.5, 0.5);
+    model.x = app.screen.width / 2;
+    model.y = app.screen.height / 2;
+    app.stage.addChild(model);
+
+    // キャンバスを PNG の dataURL で取り出す（生成スクリプトが呼ぶ）。
+    // 1回の更新ではパラメータ適用前の姿が残るため、数回まわしてから描画する
+    window.snapshot = () => {
+      for (let i = 0; i < 5; i++) {
+        model.update(16.7);
+        app.renderer.render(app.stage);
+      }
+      return app.view.toDataURL('image/png');
+    };
+
+    // モデルの読み込みが済んだ時点で準備完了（描画は snapshot() 側で行う）
+    window.READY = true;
+  } catch (e) {
+    window.LAST_ERROR = String((e && e.stack) || e);
+  }
+}
+
+init();
+</script>
+</body>
+</html>

@@ -1,0 +1,16 @@
+# ── 実行環境（setup_song_service.ps1 が構築。コミットしない）──
+venv/
+sofa_venv/
+venv_mt3/
+# ── 外部リポ・モデル・ツール（setup が公式配布元からDL）──
+sofa_repo/
+sofa_model/
+.mt3_checkpoints/
+tools_bin/
+# ── 生成物・一時（著作権素材を含みうるため公開しない）──
+output/
+_sofa_tmp/
+__pycache__/
+*.log
+*.err
+desktop.ini
