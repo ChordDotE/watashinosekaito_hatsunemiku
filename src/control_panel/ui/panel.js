@@ -158,8 +158,31 @@ function addUrl(holder, label, url) {
     } catch (e) { /* クリップボードが使えない環境では何もしない */ }
   };
   row.append(lbl, code, btn);
+  // 外出先だけ QR を出せる（このPC の URL はほかの端末から開けないため）
+  if (label === '外出先') {
+    const qr = document.createElement('button');
+    qr.textContent = 'QR';
+    qr.className = 'qr';
+    qr.onclick = showQr;
+    row.append(qr);
+  }
   holder.appendChild(row);
 }
+
+// 外出先の URL の QR コード（2026-10-20）。絵は Python 側で作る（外のサービスに送らない）
+async function showQr() {
+  const r = await window.pywebview.api.get_tunnel_qr();
+  if (!r.ok) { el('state-sub').textContent = r.message; return; }
+  el('qr-code').innerHTML = r.svg;
+  el('qr-url').textContent = r.url;
+  el('qr-note').textContent = r.keep_tunnel_on_stop
+    ? '停止しても同じ URL のまま使えます（PC を再起動すると変わります）'
+    : 'この URL は起動のたびに変わります';
+  el('qr-warn').classList.toggle('hidden', !!r.password_set);
+  el('qr-back').classList.remove('hidden');
+}
+
+function hideQr() { el('qr-back').classList.add('hidden'); }
 
 async function refresh() {
   const st = await window.pywebview.api.get_status();
@@ -536,6 +559,8 @@ whenReady().then(async () => {
     }
   };
   el('btn-open').onclick = () => window.pywebview.api.open_browser();
+  el('qr-close').onclick = hideQr;
+  el('qr-back').onclick = (e) => { if (e.target === el('qr-back')) hideQr(); };   // 外側を押したら閉じる
   el('btn-settings').onclick = () => switchTab('settings');
   el('btn-save').onclick = saveSettings;
   el('btn-reload-log').onclick = refreshLog;
@@ -555,4 +580,17 @@ whenReady().then(async () => {
   await refresh();
   // 別の手段（bat 等）で起動・停止された場合にも表示を追従させる
   statusTimer = setInterval(refresh, 5000);
+  checkUpdate();
 });
+
+// 新しい版のお知らせ（2026-10-20）。開いたときに1回だけ GitHub の最新版を確かめる。
+// 確かめられないとき（ネットが無い等）は何も出さない
+async function checkUpdate() {
+  try {
+    const r = await window.pywebview.api.check_update();
+    if (!r.available) return;
+    el('update-text').textContent = `新しい版（${r.latest}）が出ています。いまは ${r.current} です`;
+    el('update-open').onclick = () => window.pywebview.api.open_url(r.url);
+    el('update-note').classList.remove('hidden');
+  } catch (e) { /* 起動の邪魔をしない */ }
+}

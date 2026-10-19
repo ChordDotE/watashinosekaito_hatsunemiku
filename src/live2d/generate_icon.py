@@ -239,19 +239,60 @@ def generate(keep_png: bool = False) -> bool:
     return True
 
 
-def publish_to_shortcuts() -> None:
-    """生成したアイコンを、ショートカットが指すファイルへ写し、エクスプローラーに描き直させる。"""
+# ショートカットの指し先を miku_icon.ico へ付け替える PowerShell（WScript.Shell）。pywin32 を足さずに .lnk を書くため。
+# 値は環境変数で渡す（引数に日本語のパスを並べると引用が崩れやすい）
+_RETARGET_PS = r"""
+$ErrorActionPreference = 'SilentlyContinue'
+$app = $env:MIKU_ICON_APP; $ico = $env:MIKU_ICON_PATH; $n = 0
+$wsh = New-Object -ComObject WScript.Shell
+foreach ($d in ($env:MIKU_ICON_DIRS -split '\|')) {
+  if (-not $d -or -not (Test-Path $d)) { continue }
+  foreach ($f in Get-ChildItem $d -Filter *.lnk) {
+    $sc = $wsh.CreateShortcut($f.FullName)
+    if ($sc.TargetPath -and $sc.TargetPath.StartsWith($app, [StringComparison]::OrdinalIgnoreCase) -and
+        $sc.IconLocation -ne "$ico,0") {
+      $sc.IconLocation = "$ico,0"; $sc.Save(); if ($?) { $n++ }
+    }
+  }
+}
+Write-Output $n
+"""
+
+
+def _shortcut_dirs() -> list[str]:
+    """ショートカットを置く場所。0.2.1 からは個人のデスクトップ・スタートメニュー（スタート画面から書き換えられる）。
+    0.2.0 までの全ユーザー共通の場所も見る（管理者で動くセットアップから呼ばれたときは書き換えられる）。"""
+    env = os.environ.get
+    return [str(Path(env("USERPROFILE", "")) / "Desktop"),
+            str(Path(env("APPDATA", "")) / "Microsoft" / "Windows" / "Start Menu" / "Programs"),
+            str(Path(env("PUBLIC", r"C:\Users\Public")) / "Desktop"),
+            str(Path(env("ProgramData", r"C:\ProgramData")) / "Microsoft" / "Windows" / "Start Menu" / "Programs")]
+
+
+def publish_to_shortcuts() -> int:
+    """ミクの姿のアイコンをショートカットへ届ける。戻り値は付け替えたショートカットの数。
+
+    **ファイルの中身を差し替えるだけでは絵が変わらない**（2026-10-19 に公開版 0.2.0 で報告・10-20 に VM で確認）。
+    エクスプローラーはアイコンの絵を**ファイルの場所ごとに**覚えていて、中身が変わっても、ショートカットを作り直しても、
+    `ie4uinit -show` で覚えを作り直させても描き直さなかった。そこで**指し先の場所そのものを** `miku_icon.ico` へ付け替える
+    （場所が変われば必ず読み直す）。`shortcut_icon.ico` への写しは、付け替えられなかったときの控えとして残す。
+    """
     try:
         shutil.copyfile(OUT_ICO, SHORTCUT_ICO)
-    except OSError as e:
-        print(f"警告: ショートカットのアイコンを差し替えられませんでした: {e}")
-        return
+    except OSError:
+        pass
+    env = dict(os.environ, MIKU_ICON_APP=str(MIKU_DIR), MIKU_ICON_PATH=str(OUT_ICO),
+               MIKU_ICON_DIRS="|".join(_shortcut_dirs()))
     try:
-        import ctypes
-        SHCNE_ASSOCCHANGED, SHCNF_IDLIST = 0x08000000, 0x0000
-        ctypes.windll.shell32.SHChangeNotify(SHCNE_ASSOCCHANGED, SHCNF_IDLIST, None, None)
-    except Exception:
-        pass   # 描き直しは次のサインインでも起きるので、ここで失敗しても絵は変わる
+        r = subprocess.run(["powershell.exe", "-NoProfile", "-NonInteractive", "-Command", _RETARGET_PS],
+                           env=env, capture_output=True, text=True, timeout=60,
+                           creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0))
+        n = int((r.stdout or "0").strip().splitlines()[-1] or 0)
+    except (OSError, subprocess.SubprocessError, ValueError, IndexError):
+        n = 0
+    if n:
+        print(f"ショートカットのアイコンをミクの姿に付け替えました（{n} 件）")
+    return n
 
 
 def main() -> int:

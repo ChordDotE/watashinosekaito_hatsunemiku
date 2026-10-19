@@ -225,3 +225,28 @@ body:has(.progress:not(.hidden)) .savebar { bottom: 64px; }
 .linkrow .body strong { display: block; font-weight: 600; color: #223; }
 .linkrow .body span { display: block; color: #6b7684; font-size: 11px; margin-top: 2px; }
 .linkrow .ext { color: #98a2b0; flex: none; }
+
+/* 外出先の URL の QR コード（2026-10-20）。スタート画面の上に重ねて出す */
+.url button.qr { margin-left: 4px; }
+.qr-back { position: fixed; inset: 0; background: rgba(20, 28, 40, .45); display: flex;
+  align-items: center; justify-content: center; z-index: 50; }
+.qr-back.hidden { display: none; }
+.qr-card { background: #fff; border-radius: 12px; padding: 18px 22px 16px; width: 340px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, .25); text-align: center; position: relative; }
+.qr-card h3 { margin: 0 0 10px; font-size: 15px; }
+.qr-card .close { position: absolute; top: 10px; right: 12px; border: none; background: none;
+  font-size: 18px; cursor: pointer; color: #6b7684; padding: 0; }
+.qr-card .code { display: inline-block; padding: 6px; border: 1px solid #e3e7ec; border-radius: 8px; }
+.qr-card .code svg { display: block; width: 228px; height: 228px; }
+.qr-card .u { font-family: Consolas, monospace; font-size: 11px; word-break: break-all; margin: 10px 0 2px; }
+.qr-card .note { color: #6b7684; font-size: 11px; margin: 0 0 8px; }
+.qr-card .warn { background: #fff6e5; border: 1px solid #f3d08a; color: #7a5200; border-radius: 8px;
+  padding: 8px 10px; font-size: 11px; text-align: left; line-height: 1.5; }
+
+/* 新しい版のお知らせ（2026-10-20） */
+.update { background: #eaf4ff; border: 1px solid #b8d6f5; color: #1d4f80; border-radius: 10px;
+  padding: 10px 14px; margin-bottom: 12px; font-size: 12px; display: flex; flex-wrap: wrap;
+  align-items: center; gap: 6px 10px; }
+.update.hidden { display: none; }
+.update button { padding: 4px 10px; font-size: 12px; }
+.update .hint { flex-basis: 100%; color: #4f6e8c; font-size: 11px; }

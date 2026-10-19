@@ -92,6 +92,35 @@ class Api:
         st["console_attached"] = CONSOLE_ATTACHED
         return st
 
+    def check_update(self) -> dict:
+        """新しい版が出ているか（スタート画面を開いたときに1回だけ呼ぶ・2026-10-20）。"""
+        return supervisor.check_update()
+
+    def get_tunnel_qr(self) -> dict:
+        """外出先の URL を QR コード（SVG）にして返す（2026-10-20）。
+
+        絵はこの PC の中で作り、外のサービスには送らない。パスワードの有無も返し、
+        未設定なら画面が「読んだ人は誰でも入れる」と注意を出す。
+        """
+        url = supervisor.status().get("tunnel_url")
+        if not url:
+            return {"ok": False, "message": "外出先の URL がまだありません"}
+        try:
+            import segno
+        except ImportError:
+            return {"ok": False, "message": "QR コードを作る部品がありません。インストーラをもう一度実行してください"}
+        settings = supervisor.load_settings()
+        auth = settings.get("security", {}).get("auth", {})
+        return {
+            "ok": True,
+            "url": url,
+            # omitsize: 幅と高さを書かず viewBox だけにする（大きさは panel.css で決める）
+            "svg": segno.make(url, error="m").svg_inline(scale=6, border=2, dark="#111", light="#fff",
+                                                         omitsize=True),
+            "password_set": bool(auth.get("password_hash")),
+            "keep_tunnel_on_stop": bool(settings.get("system", {}).get("keep_tunnel_on_stop", True)),
+        }
+
     def get_log(self, lines: int = 40) -> str:
         return supervisor.read_log_tail(lines)
 
@@ -367,14 +396,15 @@ def _ensure_generated_icon() -> None:
     """
     generated = supervisor.RUNTIME_DIR / "miku_icon.ico"
     if generated.exists():
-        # 作れているのにショートカットが古い絵のまま、を直す（このしくみより前に入れた環境の入れ直し等）
-        shortcut = supervisor.RUNTIME_DIR / "shortcut_icon.ico"
-        try:
-            if not shortcut.exists() or shortcut.read_bytes() != generated.read_bytes():
+        # 作れているのにショートカットが簡易マークを指したまま、を直す（インストール中の生成に失敗した・
+        # 0.2.0 から入れ直した等）。指し先を確かめて、違うときだけ付け替える（裏で・PowerShell を1回）
+        def retarget() -> None:
+            try:
                 from live2d import generate_icon
                 generate_icon.publish_to_shortcuts()
-        except Exception:
-            pass
+            except Exception:
+                pass
+        threading.Thread(target=retarget, daemon=True).start()
         return
     model = (supervisor.SRC_DIR / "live2d" / "CubismWebSamples" / "Samples" / "Resources"
              / "miku_sample_t04" / "miku_sample_t04.model3.json")

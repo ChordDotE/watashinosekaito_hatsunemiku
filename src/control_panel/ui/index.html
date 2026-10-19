@@ -42,6 +42,12 @@
 </div>
 
 <section id="tab-home" class="panel">
+  <!-- 新しい版のお知らせ（GitHub の最新版が手元より新しいときだけ出す・2026-10-20） -->
+  <div class="update hidden" id="update-note">
+    <span id="update-text"></span>
+    <button id="update-open">ダウンロードページを開く</button>
+    <span class="hint">ダウンロードしたインストーラを実行すると、記憶と設定はそのままで更新されます</span>
+  </div>
   <div id="status" class="status off">
     <div class="stateico" id="state-icon">💤</div>
     <div class="txt">
@@ -144,6 +150,19 @@
   <div class="pbar"><div class="pfill" id="pfill"></div></div>
   <p class="pstep" id="pstep"></p>
   <p class="pline" id="pline"></p>
+</div>
+
+<!-- 外出先の URL の QR コード（ホームの［QR］で開く・2026-10-20） -->
+<div class="qr-back hidden" id="qr-back">
+  <div class="qr-card">
+    <button class="close" id="qr-close" title="閉じる">×</button>
+    <h3>スマホで読み取ってください</h3>
+    <div class="code" id="qr-code"></div>
+    <div class="u" id="qr-url"></div>
+    <p class="note" id="qr-note"></p>
+    <div class="warn hidden" id="qr-warn">⚠ ログインのパスワードが未設定です。<br>
+      この QR を読んだ人は誰でも入れます。「設定」タブで決めておくと安心です。</div>
+  </div>
 </div>
 
 <script src="panel.js"></script>

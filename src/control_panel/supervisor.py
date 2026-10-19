@@ -77,6 +77,42 @@ TUNNEL_URL_TIMEOUT_SEC = 30
 # コンソールウィンドウを出さずに子プロセスを起動する（Windows のみ有効）
 _NO_WINDOW = getattr(subprocess, "CREATE_NO_WINDOW", 0)
 
+# 新しい版の確かめ先（2026-10-20）。GitHub の公開 API で、認証もキーも要らない（自前のサーバーは持たない）。
+# 送るのは「最新版はどれか」の問い合わせだけで、利用者の情報は送らない
+LATEST_RELEASE_API = "https://api.github.com/repos/ChordDotE/watashinosekaito_hatsunemiku/releases/latest"
+RELEASES_PAGE = "https://github.com/ChordDotE/watashinosekaito_hatsunemiku/releases/latest"
+
+
+def _version_tuple(text: str) -> tuple[int, ...]:
+    """'v0.2.1' / '0.2.1' → (0, 2, 1)。読めない部分は 0 とみなす。"""
+    parts = []
+    for p in text.strip().lstrip("vV").split("."):
+        digits = "".join(ch for ch in p if ch.isdigit())
+        parts.append(int(digits) if digits else 0)
+    return tuple(parts)
+
+
+def current_version() -> str:
+    try:
+        return (MIKU_DIR / "VERSION").read_text(encoding="utf-8").strip()
+    except OSError:
+        return ""
+
+
+def check_update(timeout: float = 5.0) -> dict:
+    """GitHub の最新版と手元の版を比べる。確かめられなければ `available: False`（起動の邪魔をしない）。"""
+    current = current_version()
+    try:
+        r = requests.get(LATEST_RELEASE_API, timeout=timeout,
+                         headers={"Accept": "application/vnd.github+json"})
+        if r.status_code != 200:
+            return {"available": False, "current": current}
+        latest = str(r.json().get("tag_name", "")).strip()
+    except (requests.RequestException, ValueError):
+        return {"available": False, "current": current}
+    available = bool(current and latest) and _version_tuple(latest) > _version_tuple(current)
+    return {"available": available, "current": current, "latest": latest.lstrip("vV"), "url": RELEASES_PAGE}
+
 
 # ---------------------------------------------------------------------------
 # 設定
