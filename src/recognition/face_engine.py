@@ -63,7 +63,22 @@ _JST = timezone(timedelta(hours=9))
 
 EMBEDDING_DIM = 512
 
-_VDB_BASE_URL = os.environ.get("VDB_BASE_URL", "http://127.0.0.1:8020")
+def _vdb_base_url_from_settings() -> str:
+    """settings.json の services.vdb.port から VDB の URL を作る（読めなければ 8020）。
+
+    以前は 8020 の直書きで、設定でポートを変えると顔の照合だけ旧ポートを見ていた（2026-10-22）。
+    環境変数 VDB_BASE_URL があればそちらを優先する（テスト・MCP サーバーと同じ作法）。
+    """
+    try:
+        path = Path(__file__).resolve().parents[1] / "settings.json"
+        with open(path, "r", encoding="utf-8-sig") as f:
+            port = int(json.load(f).get("services", {}).get("vdb", {}).get("port", 8020))
+    except Exception:
+        port = 8020
+    return f"http://127.0.0.1:{port}"
+
+
+_VDB_BASE_URL = os.environ.get("VDB_BASE_URL") or _vdb_base_url_from_settings()
 
 _DATA_DIR = Path(
     os.environ.get(

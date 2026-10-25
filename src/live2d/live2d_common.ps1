@@ -54,10 +54,21 @@ function Get-Live2dPaths {
     }
 }
 
+# Gateway の待ち受けポート（settings.json の services.gateway.port。読めなければ 5001）
+# 以前は 5001 の直書きで、別フォルダに2つ目を入れてポートを変えると判定がずれた（2026-10-22）
+function Get-MikuGatewayPort {
+    $settingsPath = Join-Path (Split-Path $PSScriptRoot -Parent) "settings.json"
+    try {
+        $s = Get-Content -LiteralPath $settingsPath -Raw -Encoding UTF8 | ConvertFrom-Json
+        if ($s.services.gateway.port) { return [int]$s.services.gateway.port }
+    } catch {}
+    return 5001
+}
+
 # ミクのシステムが稼働中か（ビルドは配信中の dist/ を作り直すため、稼働中の実行は避けたい）
 function Test-MikuGatewayRunning {
     try {
-        $resp = Invoke-WebRequest -Uri "http://127.0.0.1:5001/" -Method Head -TimeoutSec 2 -UseBasicParsing -ErrorAction Stop
+        $resp = Invoke-WebRequest -Uri ("http://127.0.0.1:" + (Get-MikuGatewayPort) + "/") -Method Head -TimeoutSec 2 -UseBasicParsing -ErrorAction Stop
         if ($resp) { return $true }
     } catch {}
     return $false
@@ -250,6 +261,22 @@ function Invoke-Live2dBuild {
 # ★vite は組み立ての最初に dist/ を空にするので、失敗に備えて dist/ を退避してから組み立て、失敗したら戻す
 function Invoke-Live2dRebuild {
     param([Parameter(Mandatory = $true)][hashtable]$Paths)
+    # 制御コードと組み立ての材料が前回組み立てたときと同じなら、組み立て直さない（入れ直しの短縮・2026-10-25）。
+    # 印の関数は setup_common.ps1 にある（単体の setup_live2d.ps1 から呼ばれたときは無いので、毎回組み立てる）
+    $mikuDir = Split-Path -Parent (Split-Path -Parent $Paths.Live2dDir)   # src\live2d → miku
+    $stampHash = $null
+    if (Get-Command Get-MikuInputHash -ErrorAction SilentlyContinue) {
+        $inputs = @(Get-ChildItem -Path (Join-Path $Paths.Live2dDir "src"), (Join-Path $Paths.Live2dDir "dist") -File -Recurse -ErrorAction SilentlyContinue |
+                    ForEach-Object { $_.FullName })
+        $inputs += @("package.json", "package-lock.json", "esbuild.config.js", "tsconfig.json", "apply_patches.ps1", "live2d_common.ps1" |
+                     ForEach-Object { Join-Path $Paths.Live2dDir $_ })
+        $stampHash = Get-MikuInputHash -Files $inputs
+        if ((Test-Path (Join-Path $Paths.DemoDir "dist\index.html")) -and
+            (Test-MikuStamp -MikuDir $mikuDir -Name "live2d_build" -Hash $stampHash)) {
+            Write-Host " [SKIP] 制御コードは前回の組み立てから変わっていないので、組み立て直しません"
+            return $true
+        }
+    }
     $nodeOk = Install-NodeJs
     if (-not $nodeOk) {
         Write-Host " [SKIP] Node.js が無いため組み立て直しません（前の Live2D をそのまま使います）"
@@ -267,6 +294,7 @@ function Invoke-Live2dRebuild {
     if ($built -and (Test-Path (Join-Path $dist "index.html"))) {
         if (Test-Path $prev) { Remove-Item $prev -Recurse -Force }
         Write-Host " [OK] 制御コードを最新にして組み立て直しました"
+        if ($stampHash) { Set-MikuStamp -MikuDir $mikuDir -Name "live2d_build" -Hash $stampHash }
         return $true
     }
     Write-Host " [NG] 組み立て直しに失敗しました。前の Live2D をそのまま使います"

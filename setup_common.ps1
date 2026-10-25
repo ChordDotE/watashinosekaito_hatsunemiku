@@ -39,6 +39,42 @@
 $script:MIKU_UV_VERSION = "0.11.32"
 
 # ==========================================
+#   入れ直しで「変わったところだけ」やるための印（2026-10-25）
+# ==========================================
+# 各段階が成功したら「何を元に作ったか」の照合値を runtime\stamps\<名前>.txt に残し、次の入れ直しで
+# 同じなら飛ばす。本人「ハッシュ値が一致しないところだけ更新する動作にできないか」——0.2.1→0.2.2 の
+# 入れ直しが約6分かかり、ほとんどが変わっていない段階の確かめ直しだった。
+# 印は成功したときだけ書く（途中で止めたら次は必ずやり直す）。runtime はアンインストールで消える。
+
+# ファイル群の中身から1つの照合値を作る（無いファイルは名前だけ混ぜる＝増減も差として拾う）
+function Get-MikuInputHash {
+    param([Parameter(Mandatory = $true)][string[]]$Files, [string]$Extra = "")
+    $sb = New-Object System.Text.StringBuilder
+    [void]$sb.Append($Extra)
+    foreach ($f in ($Files | Sort-Object)) {
+        [void]$sb.Append("|" + [IO.Path]::GetFileName($f) + "=")
+        if (Test-Path $f -PathType Leaf) { [void]$sb.Append((Get-FileHash $f -Algorithm SHA256).Hash) }
+    }
+    $bytes = [Text.Encoding]::UTF8.GetBytes($sb.ToString())
+    return ([BitConverter]::ToString([Security.Cryptography.SHA256]::Create().ComputeHash($bytes))).Replace("-", "")
+}
+
+function Test-MikuStamp {
+    param([Parameter(Mandatory = $true)][string]$MikuDir, [Parameter(Mandatory = $true)][string]$Name,
+          [Parameter(Mandatory = $true)][string]$Hash)
+    $p = Join-Path $MikuDir "runtime\stamps\$Name.txt"
+    return (Test-Path $p) -and ((Get-Content $p -Raw -ErrorAction SilentlyContinue).Trim() -eq $Hash)
+}
+
+function Set-MikuStamp {
+    param([Parameter(Mandatory = $true)][string]$MikuDir, [Parameter(Mandatory = $true)][string]$Name,
+          [Parameter(Mandatory = $true)][string]$Hash)
+    $dir = Join-Path $MikuDir "runtime\stamps"
+    New-Item -ItemType Directory -Force $dir | Out-Null
+    Set-Content -Path (Join-Path $dir "$Name.txt") -Value $Hash -NoNewline -Encoding ASCII
+}
+
+# ==========================================
 #   設定ファイルの準備
 # ==========================================
 
@@ -402,6 +438,8 @@ function Install-MikuPythonEnv {
 
     Write-Host ""
     Write-Host "仮想環境を確認・作成しています..."
+    # 環境を今回作ったなら、前回の印があっても部品は入れる（下の python_deps の判断に使う）
+    $venvExisted = Test-Path $venvPath
     if (Test-Path $venvPath) {
         Write-Host "仮想環境は既に存在します: $venvPath"
     } elseif ($useUv) {
@@ -511,6 +549,15 @@ function Install-MikuPythonEnv {
     # ※ 2026-08-26 まで理由は sentence-transformers だったが、同パッケージは未使用のため削除した。
     #    torch を引き込むのは上記2つになったので、順序の規則自体は変わらず必要
     Set-Location $srcDir
+    # 一覧（requirements）が前回入れたときと同じなら、確かめ直さない（入れ直しの短縮・2026-10-25）
+    $reqHash = Get-MikuInputHash -Files @((Join-Path $srcDir "requirements2.txt"), (Join-Path $srcDir "requirements.txt")) -Extra $pythonExe
+    if ($venvExisted -and (Test-MikuStamp -MikuDir $MikuDir -Name "python_deps" -Hash $reqHash)) {
+        Write-Host "Python の部品は前回から変わっていないので、確認を飛ばします"
+        $result.Ok = $true
+        $result.PythonExe = $pythonExe
+        $result.UseUv = $useUv
+        return $result
+    }
     foreach ($req in @(
         @{ Label = "PyTorchパッケージ（CUDA対応版）"; File = "requirements2.txt" },
         @{ Label = "一般的なパッケージ";              File = "requirements.txt" }
@@ -534,6 +581,7 @@ function Install-MikuPythonEnv {
         }
         Write-Host "$($req.Label) のインストールが完了しました"
     }
+    Set-MikuStamp -MikuDir $MikuDir -Name "python_deps" -Hash $reqHash
 
     $result.Ok = $true
     $result.PythonExe = $pythonExe
@@ -545,9 +593,14 @@ function Install-MikuPythonEnv {
 function Install-MikuFaceWeights {
     param([Parameter(Mandatory = $true)][string]$MikuDir)
     Write-Host ""
-    Write-Host "顔認識モデルの重みをダウンロードしています（約107MB・初回のみ）..."
     # 保存先はフォルダ内（runtime\models）に隔離。system_start.ps1 も同じ環境変数を設定する
     $env:TORCH_HOME = Join-Path $MikuDir "runtime\models\torch"
+    # 取得済みなら確かめに読み込まない（PyTorch の読み込みだけで数十秒かかっていた・2026-10-25）
+    if (Test-Path (Join-Path $env:TORCH_HOME "checkpoints\20180402-114759-vggface2.pt")) {
+        Write-Host "顔認識モデルの重みは取得済みです"
+        return $true
+    }
+    Write-Host "顔認識モデルの重みをダウンロードしています（約107MB・初回のみ）..."
     # 一過性のDNS/ネットワーク失敗（Hyper-V NAT等で実例あり）に備えて最大3回試行する
     for ($attempt = 1; $attempt -le 3; $attempt++) {
         python -c "from facenet_pytorch import InceptionResnetV1; InceptionResnetV1(pretrained='vggface2')"
@@ -566,10 +619,15 @@ function Install-MikuFaceWeights {
 function Install-MikuVoiceWeights {
     param([Parameter(Mandatory = $true)][string]$MikuDir)
     Write-Host ""
-    Write-Host "話者照合モデルの重みをダウンロードしています（約80MB・初回のみ）..."
     # 保存先はフォルダ内（runtime\models）に隔離。system_start.ps1 も同じ環境変数を設定する
     $env:HF_HOME = Join-Path $MikuDir "runtime\models\hf"
     $saveDir = Join-Path $MikuDir "runtime\models\speechbrain_ecapa"
+    # 取得済みなら確かめに読み込まない（speechbrain の読み込みだけで数十秒かかっていた・2026-10-25）
+    if ((Test-Path (Join-Path $saveDir "embedding_model.ckpt")) -and (Test-Path (Join-Path $saveDir "hyperparams.yaml"))) {
+        Write-Host "話者照合モデルの重みは取得済みです"
+        return $true
+    }
+    Write-Host "話者照合モデルの重みをダウンロードしています（約80MB・初回のみ）..."
     $py = "from speechbrain.inference.speaker import EncoderClassifier; " +
           "EncoderClassifier.from_hparams(source='speechbrain/spkrec-ecapa-voxceleb', " +
           "savedir=r'$saveDir', run_opts={'device':'cpu'})"
@@ -664,6 +722,17 @@ function Install-MikuSongService {
         Write-Host "  VOCALOID6 を導入してから、もう一度この機能を追加してください。"
         return $false
     }
+    # 材料（部品の一覧・セットアップの中身・取得するモデル）と構成が前回と同じで、環境もあれば、確かめ直さない
+    # （入れ直しの短縮・2026-10-25。VOCALOID6 の起動確認も飛ぶので、本番の歌声の書き出しとぶつからない）
+    $songDir = Join-Path $MikuDir "src\song_service"
+    $songInputs = @(Get-ChildItem $songDir -Filter "requirements_*.txt" -File -ErrorAction SilentlyContinue | ForEach-Object { $_.FullName })
+    $songInputs += @((Join-Path $songDir "setup_song_service.ps1"), (Join-Path $songDir "prefetch_models.py"))
+    $songHash = Get-MikuInputHash -Files $songInputs -Extra ("OriginalOnly=" + [bool]$OriginalOnly)
+    if ((Test-Path (Join-Path $songDir "venv\Scripts\python.exe")) -and
+        (Test-MikuStamp -MikuDir $MikuDir -Name "song_service" -Hash $songHash)) {
+        Write-Host "作曲機能は前回から変わっていないので、確認を飛ばします"
+        return $true
+    }
     if ($OriginalOnly) {
         Write-Host "オリジナル曲と、楽譜（MIDI）が見つかる曲のカバーに要るものを取得します（約4GB・十数分）。"
         Write-Host "  うち約3GBは、歌声を聞き取るためのものです（鼻歌を歌詞ごと受け取れるようになります）。"
@@ -714,6 +783,7 @@ function Install-MikuSongService {
         }
         [System.IO.File]::WriteAllText($SettingsJson, ($sc | ConvertTo-Json -Depth 10), [System.Text.UTF8Encoding]::new($false))
         Write-Host "OK settings.json の song_service.enabled を true にしました"
+        Set-MikuStamp -MikuDir $MikuDir -Name "song_service" -Hash $songHash
         return $true
     } catch {
         Write-Host "警告: settings.json の更新に失敗しました（設定画面から作曲機能を ON にしてください）: $_"

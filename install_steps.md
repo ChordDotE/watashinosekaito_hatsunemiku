@@ -276,6 +276,9 @@ $env:MIKU_SETUP_FISH_API_KEY   = "<Fish Audio のキー>"
 .\MikuAgentSetup.exe /SILENT /LIVE2DSDK="C:\path\CubismSdkForWeb-5-r.4.zip" /LIVE2DMODEL="C:\path\miku_pro_jp.zip"
 ```
 
+> ⚠️ **管理者として開いた PowerShell の中で、環境変数を設定してから実行してください。** インストーラは管理者の権限で
+> 動くので、ふつうの PowerShell から起動すると管理者へ切り替わるときに環境変数が引き継がれず、「APIキーが未入力です」で止まります。
+
 `/SILENT` は画面を出したまま、`/VERYSILENT` は画面なしで最後まで進みます。
 外部アクセスは `/TUNNEL=1`、作曲機能は `/SONGSERVICE=1` を付けると入ります。
 展開済みの `miku` フォルダがあれば、`miku\setup_unattended.ps1` を直接呼んでも同じことができます。

@@ -2933,6 +2933,14 @@ def test_page():
 # メイン
 # =============================================================================
 
+def _gateway_port() -> int:
+    """Gateway の待ち受けポート（settings.json の services.gateway.port。無い・読めないときは 5001）。"""
+    try:
+        return int(settings.get('services', {}).get('gateway', {}).get('port', 5001))
+    except (TypeError, ValueError):
+        return 5001
+
+
 def main() -> None:
     """単体起動の入口。配布物では `.pyd` 化されるため、起動処理は関数に置く。"""
     print("=" * 60)
@@ -2947,10 +2955,13 @@ def main() -> None:
     print(f"Live2D dist folder: {LIVE2D_DIST_DIR}")
     print(f"Live2D exists: {LIVE2D_DIST_DIR.exists()}")
     print("")
-    print("Open http://localhost:5001 for main application")
-    print("Open http://localhost:5001/settings for settings page")
-    print("Open http://localhost:5001/live2d for Live2D")
-    print("Open http://localhost:5001/test for test page")
+    # 待ち受けポートは settings.json の services.gateway.port（無ければ 5001）。
+    # 以前は 5001 に直書きで、設定を変えても効かなかった（別フォルダに2つ目を入れる用途で問題になる・2026-10-22）
+    port = _gateway_port()
+    print(f"Open http://localhost:{port} for main application")
+    print(f"Open http://localhost:{port}/settings for settings page")
+    print(f"Open http://localhost:{port}/live2d for Live2D")
+    print(f"Open http://localhost:{port}/test for test page")
     print("=" * 60)
     
     # 終了時のクリーンアップ
@@ -2958,7 +2969,7 @@ def main() -> None:
     atexit.register(cleanup)
     
     # サーバー起動
-    socketio.run(app, debug=False, host='0.0.0.0', port=5001, allow_unsafe_werkzeug=True)
+    socketio.run(app, debug=False, host='0.0.0.0', port=port, allow_unsafe_werkzeug=True)
 
 
 if __name__ == "__main__":

@@ -51,7 +51,7 @@ Write-Host "Live2Dディレクトリ: $LIVE2D_DIR"
 # 一時的な表示不能・ビルド失敗時の破損リスクがある
 if (Test-MikuGatewayRunning) {
     Write-Host ""
-    Write-Host " [警告] ミクのシステムが稼働中のようです（:5001 応答あり）。"
+    Write-Host (" [警告] ミクのシステムが稼働中のようです（:" + (Get-MikuGatewayPort) + " 応答あり）。")
     Write-Host "        セットアップは Live2D の配信ファイルを作り直すため、システム終了後の実行を推奨します。"
     $c = Read-Host " それでも続行しますか？ (Y/N)"
     if ($c -ine "Y") {
